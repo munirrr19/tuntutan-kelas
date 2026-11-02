@@ -213,14 +213,23 @@ async function api(body) {
   if (!token()) throw new Error('Sila buka link peribadi anda daripada admin');
   const res = body
     ? await fetch(API, { method: 'POST', body: JSON.stringify({ ...body, token: token() }) }) // text/plain: elak preflight CORS
-    : await fetch(API + '?token=' + encodeURIComponent(token()));
+    : await fetch(API + '?token=' + encodeURIComponent(token()) + '&tahun=' + tahunDimuat);
   const data = await res.json();
   if (!data.ok) throw Object.assign(new Error(data.ralat || 'Ralat pelayan'), { pelayan: true });
   return data;
 }
+// Rekod dimuat setahun demi setahun (tahun bulan yang dipilih)
+let tahunDimuat = bulan.slice(0, 4);
+function tukarBulan(b) {
+  bulan = b;
+  lukis();
+  if (b.slice(0, 4) !== tahunDimuat) { tahunDimuat = b.slice(0, 4); muat(); }
+}
 async function muat() {
   try {
+    const tahun = tahunDimuat;
     const d = await api();
+    if (tahun !== tahunDimuat) return; // pengguna sudah tukar tahun semasa menunggu
     guru = d.guru;
     // Rekod yang belum sampai ke Sheet kekal dipaparkan
     entri = d.entri.filter(x => !gilir().some(q => q.id === x.id)).concat(gilir().map(q => ({ ...q, guru: guru.id })));
@@ -252,7 +261,11 @@ async function hantar() {
       try {
         await api({ action: 'simpan', entri: r });
       } catch (err) {
-        if (!err.pelayan) { mesej(`${q.length} rekod belum dihantar. Akan dicuba semula.`); return; }
+        if (!err.pelayan) {
+          mesej(`${q.length} rekod belum dihantar. Akan dicuba semula.`);
+          clearTimeout(hantar.t); hantar.t = setTimeout(hantar, 30000); // pelayan sibuk atau tiada internet
+          return;
+        }
         // Pelayan tolak (cth data tidak sah): buang dari gilir dan paparan supaya tidak dicuba selamanya
         entri = entri.filter(x => x.id !== r.id); lukis();
         mesej(`Rekod ${tarikhTeks(r.tarikh)} ditolak: ${err.message}`);
@@ -339,8 +352,7 @@ $('fCatat').onsubmit = async e => {
   localStorage.setItem('tingkatanAkhir', r.tingkatan);
   localStorage.setItem('mulaAkhir', r.mula);
   mesej(idUbah ? 'Dikemas kini' : 'Disimpan');
-  bulan = r.tarikh.slice(0, 7);
-  resetCatat(); lukis();
+  resetCatat(); tukarBulan(r.tarikh.slice(0, 7));
   $('tarikh').value = r.tarikh; paparTarikh(); // kekalkan tarikh untuk isi beberapa kelas lepas sekali gus
   hantar();
 };
@@ -488,7 +500,7 @@ window.tandaSelesai = async batal => {
     lukis(); mesej(batal ? 'Dibuka semula' : 'Ditanda SELESAI');
   } catch (err) { mesej(err.message); }
 };
-document.querySelectorAll('.pilihBulan').forEach(i => i.onchange = () => { if (i.value) { bulan = i.value; lukis(); } });
+document.querySelectorAll('.pilihBulan').forEach(i => i.onchange = () => { if (i.value) tukarBulan(i.value); });
 
 // ---- Tetapan ----
 function isiTetapan() {

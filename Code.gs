@@ -93,17 +93,18 @@ function jawab_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
 
-// GET: rekod guru ini (admin: semua guru) + profil + kadar
+// GET: rekod guru ini (admin: semua guru) untuk satu tahun + profil + kadar
 function doGet(e) {
   try {
     const guru = cariGuru_(e.parameter.token);
-    // shortcut: admin terima semua rekod sepanjang masa; tapis ikut tahun jika data jadi terlalu besar
-    const entri = baris_(DATA).filter(r => r[0]).map(r => {
+    // Hantar setahun sahaja: data bertahun (~7,000 rekod/tahun) terlalu besar untuk telefon admin
+    const tahun = String(e.parameter.tahun || '');
+    const entri = baris_(DATA).filter(r => r[0] && String(r[1]).startsWith(tahun) && (guru.admin || String(r[7]) === guru.id)).map(r => {
       const o = {};
       LAJUR.forEach((k, i) => o[k] = String(r[i]));
       o.jam = Number(o.jam);
       return o;
-    }).filter(o => guru.admin || o.guru === guru.id);
+    });
     const t = {};
     baris_(TETAPAN).forEach(r => { if (r[0]) t[r[0]] = String(r[1]); });
     const selesai = helaiSelesai_().getDataRange().getValues().slice(1)
@@ -123,7 +124,8 @@ function doGet(e) {
 // POST (body JSON sebagai text/plain): simpan | padam | profil
 function doPost(e) {
   const lock = LockService.getScriptLock();
-  lock.waitLock(10000);
+  // Hujung bulan ramai guru simpan serentak; jika masih sibuk, ralat ini bukan JSON dan telefon akan cuba semula
+  lock.waitLock(30000);
   try {
     const b = JSON.parse(e.postData.contents);
     const guru = cariGuru_(b.token);
