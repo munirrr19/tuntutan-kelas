@@ -64,8 +64,7 @@
     body { background: #fff; }
     header, nav, .tiada-cetak, .mesej { display: none !important; }
     main { max-width: none; padding: 0; }
-    section { display: none !important; }
-    #tab-borang { display: block !important; }
+    section:not(.aktif) { display: none !important; }
     .pratonton { background: none; padding: 0; overflow: visible; }
     .halaman { margin: 0; page-break-after: always; }
     .halaman:last-child { page-break-after: auto; }
@@ -82,6 +81,7 @@
   <button data-tab="senarai">Senarai</button>
   <button data-tab="borang">Borang</button>
   <button data-tab="tetapan">Tetapan</button>
+  <button data-tab="admin" id="navAdmin" hidden>Admin</button>
 </nav>
 <main>
   <section id="tab-catat" class="aktif">
@@ -125,12 +125,17 @@
       <label for="tNama">Nama</label><input id="tNama">
       <label for="tKp">No Kad Pengenalan</label><input id="tKp" inputmode="numeric">
       <label for="tTel">No Telefon</label><input id="tTel" inputmode="tel">
-      <label for="tKadar">Kadar sejam (RM)</label><input id="tKadar" type="number" min="0" step="0.5">
-      <hr style="margin:20px 0;border:0;border-top:1px solid #eee">
-      <label for="tUrl">URL Apps Script</label><input id="tUrl" placeholder="https://script.google.com/macros/s/.../exec">
-      <label for="tToken">Token</label><input id="tToken" type="password" autocomplete="off">
       <button type="submit" class="btn utama">Simpan tetapan</button>
     </form>
+  </section>
+
+  <section id="tab-admin">
+    <div class="bulan tiada-cetak">
+      <input type="month" class="pilihBulan" aria-label="Bulan">
+      <button class="btn" onclick="cetakGuru(null)">Cetak semua</button>
+    </div>
+    <div class="kad tiada-cetak" id="ringkasAdmin"></div>
+    <div class="pratonton" id="borangAdmin"></div>
   </section>
 </main>
 <div class="mesej" id="mesej"></div>
@@ -141,8 +146,13 @@ const TINGKATAN = [1,2,3,4,5,6].flatMap(t => [t + 'A', t + 'B']);
 const BARIS_SEHALAMAN = 20;
 const $ = id => document.getElementById(id);
 
-let entri = [];
-let tetapan = { kadar: '30' };
+const API = 'https://script.google.com/macros/s/AKfycbw9zaNiQtD7Z2TaqZCky1uiwonQTdCDmWte-rZWsaIH08MTRll5LtCvUE9QtouTrun0/exec';
+
+let entri = [];        // guru: rekod sendiri; admin: rekod semua guru
+let guru = {};         // profil pengguna ini
+let semuaGuru = [];    // admin sahaja
+let kadarSejam = 30;
+let pilihCetak = null; // admin: id guru untuk dicetak seorang, null = semua
 let idUbah = null;
 let bulan = new Date().toLocaleDateString('en-CA').slice(0, 7);
 
@@ -157,7 +167,7 @@ function masaTeks(t) {
   return h12 + '.' + String(min % 60).padStart(2, '0') + ' ' + sufiks;
 }
 const tarikhTeks = t => t.split('-').reverse().join('/');
-const kadar = () => Number(tetapan.kadar) || 30;
+const kadar = () => kadarSejam;
 // Pecah kepada halaman 20 baris; sekurang-kurangnya satu halaman kosong
 const pecah = (arr, n) => arr.length ? Array.from({ length: Math.ceil(arr.length / n) }, (_, i) => arr.slice(i * n, i * n + n)) : [[]];
 
@@ -173,13 +183,16 @@ function mesej(teks) {
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 // ---- API (Google Apps Script) ----
-const sambungan = () => ({ url: localStorage.getItem('url') || '', token: localStorage.getItem('token') || '' });
+// Link peribadi guru: .../#k=TOKEN. Simpan token, kemudian buang dari bar alamat.
+const kunci = new URLSearchParams(location.hash.slice(1)).get('k');
+if (kunci) { localStorage.setItem('token', kunci); history.replaceState(null, '', location.pathname); }
+const token = () => localStorage.getItem('token') || '';
+
 async function api(body) {
-  const { url, token } = sambungan();
-  if (!url || !token) throw new Error('Sila isi URL dan Token di Tetapan');
+  if (!token()) throw new Error('Sila buka link peribadi anda daripada admin');
   const res = body
-    ? await fetch(url, { method: 'POST', body: JSON.stringify({ ...body, token }) }) // text/plain: elak preflight CORS
-    : await fetch(url + '?token=' + encodeURIComponent(token));
+    ? await fetch(API, { method: 'POST', body: JSON.stringify({ ...body, token: token() }) }) // text/plain: elak preflight CORS
+    : await fetch(API + '?token=' + encodeURIComponent(token()));
   const data = await res.json();
   if (!data.ok) throw new Error(data.ralat || 'Ralat pelayan');
   return data;
@@ -188,9 +201,12 @@ async function muat() {
   try {
     const d = await api();
     entri = d.entri;
-    tetapan = { kadar: '30', ...d.tetapan };
-    isiTetapan(); lukis();
-  } catch (e) { mesej(e.message); if (!sambungan().url) tukarTab('tetapan'); }
+    guru = d.guru;
+    kadarSejam = d.kadar;
+    semuaGuru = d.semuaGuru || [];
+    $('navAdmin').hidden = !guru.admin;
+    isiTetapan(); lukis(); kemasRingkas();
+  } catch (e) { mesej(e.message); }
 }
 
 // ---- Tab ----
@@ -242,6 +258,7 @@ $('fCatat').onsubmit = async e => {
     mula: $('mula').value,
     tamat: $('tamat').value,
     catatan: $('catatan').value.trim(),
+    guru: guru.id,
   };
   r.jam = kiraJam(r.mula, r.tamat);
   $('btnSimpan').disabled = true;
@@ -258,12 +275,13 @@ $('fCatat').onsubmit = async e => {
 };
 
 // ---- Senarai & Borang ----
-const entriBulan = () => entri.filter(x => x.tarikh.startsWith(bulan)).sort((a, b) => (a.tarikh + a.mula).localeCompare(b.tarikh + b.mula));
+const entriBulan = idGuru => entri.filter(x => x.guru === idGuru && x.tarikh.startsWith(bulan)).sort((a, b) => (a.tarikh + a.mula).localeCompare(b.tarikh + b.mula));
+const jumlah = senarai => senarai.reduce((s, x) => s + x.jam, 0);
 
 function lukis() {
   document.querySelectorAll('.pilihBulan').forEach(i => i.value = bulan);
-  const senarai = entriBulan();
-  const jumlahJam = senarai.reduce((s, x) => s + x.jam, 0);
+  const senarai = entriBulan(guru.id);
+  const jumlahJam = jumlah(senarai);
 
   $('senarai').innerHTML = senarai.length
     ? senarai.map(x => `<div class="item"><div><b>${tarikhTeks(x.tarikh)} · ${esc(x.tingkatan)}</b>
@@ -273,16 +291,36 @@ function lukis() {
       + `<div class="jumlah">${jamTeks(jumlahJam)} jam × RM${kadar()} = RM${rm(jumlahJam * kadar())}</div>`
     : '<div class="kosong">Tiada rekod untuk bulan ini</div>';
 
+  $('borang').innerHTML = borangHTML(guru, senarai);
+  if (guru.admin) lukisAdmin();
+}
+
+function lukisAdmin() {
+  const ada = semuaGuru.map(g => ({ g, senarai: entriBulan(g.id) })).filter(x => x.senarai.length)
+    .sort((a, b) => a.g.nama.localeCompare(b.g.nama));
+  const jam = ada.reduce((s, x) => s + jumlah(x.senarai), 0);
+  $('ringkasAdmin').innerHTML = ada.length
+    ? ada.map(({ g, senarai }) => `<div class="item"><div><b>${esc(g.nama) || '(tiada nama)'}</b>
+        <small>${senarai.length} kelas · ${jamTeks(jumlah(senarai))} jam · RM${rm(jumlah(senarai) * kadar())}</small></div>
+        <button class="btn" onclick="cetakGuru('${g.id}')">Cetak</button></div>`).join('')
+      + `<div class="jumlah">${ada.length} guru · ${jamTeks(jam)} jam · RM${rm(jam * kadar())}</div>`
+    : '<div class="kosong">Tiada rekod untuk bulan ini</div>';
+  $('borangAdmin').innerHTML = ada.filter(x => !pilihCetak || x.g.id === pilihCetak).map(x => borangHTML(x.g, x.senarai)).join('');
+}
+window.cetakGuru = id => { pilihCetak = id; lukisAdmin(); print(); pilihCetak = null; lukisAdmin(); };
+
+function borangHTML(profil, senarai) {
+  const jumlahJam = jumlah(senarai);
   const [thn, bln] = bulan.split('-');
   const halaman = pecah(senarai, BARIS_SEHALAMAN);
-  $('borang').innerHTML = halaman.map((h, hi) => `<div class="halaman">
+  return halaman.map((h, hi) => `<div class="halaman">
     <div class="kepala"><img src="logo.png" alt=""><div>
       <div class="ar">معهد تحفيظ القرءان والقراءات</div>
       <b>MAAHAD TAHFIZ AL QURAN WAL QIRAAT</b><b>16600 PULAI CHONDONG</b></div></div>
     <div class="tajuk">BORANG TUNTUTAN MENGAJAR KELAS AL-QURAN</div>
     <div class="medan" style="justify-content:flex-end"><b>BULAN :</b><span style="flex:0 0 35mm">${BULAN[bln - 1].toUpperCase()}</span><b>TAHUN :</b><span style="flex:0 0 25mm">${thn}</span></div>
-    <div class="medan"><b>NAMA :</b><span>${esc(tetapan.nama)}</span></div>
-    <div class="medan"><b>NO KAD PENGENALAN :</b><span>${esc(tetapan.kp)}</span><b>NO TELEFON :</b><span>${esc(tetapan.telefon)}</span></div>
+    <div class="medan"><b>NAMA :</b><span>${esc(profil.nama)}</span></div>
+    <div class="medan"><b>NO KAD PENGENALAN :</b><span>${esc(profil.kp)}</span><b>NO TELEFON :</b><span>${esc(profil.telefon)}</span></div>
     <p>Dengan ini, saya menuntut bayaran mengajar kelas Al Quran di Maahad Tahfiz Al Quran Wal Qiraat sebagaimana kenyataan berikut:</p>
     <table><thead><tr><th style="width:9%">BIL</th><th style="width:14%">TARIKH</th><th style="width:13%">TINGKATAN</th><th style="width:26%">MASA</th><th style="width:13%">JUMLAH JAM</th><th>CATATAN</th></tr></thead>
     <tbody>${Array.from({ length: BARIS_SEHALAMAN }, (_, i) => {
@@ -295,7 +333,7 @@ function lukis() {
     <div class="kotak">JUMLAH KESELURUHAN JAM MENGAJAR <b>${jamTeks(jumlahJam)}</b> JAM X RM${kadar()}<br>
       <b style="font-size:12pt">JUMLAH KESELURUHAN, RM : ${rm(jumlahJam * kadar())}</b></div>
     <div class="tt">
-      <div>Nama dan tandatangan guru<div class="ruang"></div>( ${esc(tetapan.nama) || '&nbsp;'.repeat(60)} )</div>
+      <div>Nama dan tandatangan guru<div class="ruang"></div>( ${esc(profil.nama) || '&nbsp;'.repeat(60)} )</div>
       <div>Disemak oleh :<div class="ruang"></div>(......................................................)<br>Setiausaha Al - Quran<br>Maahad Tahfiz Al Quran Wal Qiraat</div></div>
     <div style="text-align:right;margin-top:5mm">Tarikh : ..............................</div>`}
   </div>`).join('');
@@ -322,26 +360,22 @@ document.querySelectorAll('.pilihBulan').forEach(i => i.onchange = () => { if (i
 
 // ---- Tetapan ----
 function isiTetapan() {
-  $('tNama').value = tetapan.nama || '';
-  $('tKp').value = tetapan.kp || '';
-  $('tTel').value = tetapan.telefon || '';
-  $('tKadar').value = tetapan.kadar || '30';
-  $('tUrl').value = sambungan().url;
-  $('tToken').value = sambungan().token;
+  $('tNama').value = guru.nama || '';
+  $('tKp').value = guru.kp || '';
+  $('tTel').value = guru.telefon || '';
 }
 $('fTetapan').onsubmit = async e => {
   e.preventDefault();
-  localStorage.setItem('url', $('tUrl').value.trim());
-  localStorage.setItem('token', $('tToken').value.trim());
-  const baru = { nama: $('tNama').value.trim(), kp: $('tKp').value.trim(), telefon: $('tTel').value.trim(), kadar: $('tKadar').value || '30' };
+  const profil = { nama: $('tNama').value.trim(), kp: $('tKp').value.trim(), telefon: $('tTel').value.trim() };
   try {
-    await api({ action: 'tetapan', tetapan: baru });
-    tetapan = baru; mesej('Tetapan disimpan');
-    await muat(); kemasRingkas();
+    await api({ action: 'profil', profil });
+    Object.assign(guru, profil);
+    semuaGuru.filter(g => g.id === guru.id).forEach(g => Object.assign(g, profil));
+    mesej('Tetapan disimpan'); lukis();
   } catch (err) { mesej(err.message); }
 };
 
-resetCatat(); isiTetapan(); lukis(); muat();
+resetCatat(); lukis(); muat();
 </script>
 </body>
 </html>
