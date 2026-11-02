@@ -209,20 +209,49 @@ async function api(body) {
     ? await fetch(API, { method: 'POST', body: JSON.stringify({ ...body, token: token() }) }) // text/plain: elak preflight CORS
     : await fetch(API + '?token=' + encodeURIComponent(token()));
   const data = await res.json();
-  if (!data.ok) throw new Error(data.ralat || 'Ralat pelayan');
+  if (!data.ok) throw Object.assign(new Error(data.ralat || 'Ralat pelayan'), { pelayan: true });
   return data;
 }
 async function muat() {
   try {
     const d = await api();
-    entri = d.entri;
     guru = d.guru;
+    // Rekod yang belum sampai ke Sheet kekal dipaparkan
+    entri = d.entri.filter(x => !gilir().some(q => q.id === x.id)).concat(gilir().map(q => ({ ...q, guru: guru.id })));
     kadarSejam = d.kadar;
     semuaGuru = d.semuaGuru || [];
     $('navAdmin').hidden = !guru.admin;
     isiTetapan(); lukis(); kemasRingkas();
+    hantar();
   } catch (e) { mesej(e.message); }
 }
+
+// ---- Gilir simpanan ----
+// Apps Script ambil 2-3 saat setiap simpanan. Rekod dipaparkan serta-merta dan dihantar di belakang;
+// rekod yang belum sampai disimpan dalam peranti supaya tidak hilang jika app ditutup atau tiada internet.
+const gilir = () => JSON.parse(localStorage.getItem('gilir') || '[]');
+const setGilir = q => localStorage.setItem('gilir', JSON.stringify(q));
+let menghantar = false;
+async function hantar() {
+  if (menghantar || !token()) return;
+  menghantar = true;
+  try {
+    for (let q = gilir(); q.length; q = gilir()) {
+      const r = q[0], sama = x => JSON.stringify(x) === JSON.stringify(r);
+      try {
+        await api({ action: 'simpan', entri: r });
+      } catch (err) {
+        if (!err.pelayan) { mesej(`${q.length} rekod belum dihantar. Akan dicuba semula.`); return; }
+        // Pelayan tolak (cth data tidak sah): buang dari gilir dan paparan supaya tidak dicuba selamanya
+        entri = entri.filter(x => x.id !== r.id); lukis();
+        mesej(`Rekod ${tarikhTeks(r.tarikh)} ditolak: ${err.message}`);
+      }
+      setGilir(gilir().filter(x => !sama(x))); // jika diubah semasa dihantar, versi baru kekal
+    }
+  } finally { menghantar = false; }
+}
+addEventListener('online', hantar);
+addEventListener('beforeunload', e => { if (gilir().length) e.preventDefault(); });
 
 // ---- Tab ----
 function tukarTab(nama) {
@@ -285,18 +314,15 @@ $('fCatat').onsubmit = async e => {
     guru: guru.id,
   };
   r.jam = kiraJam(r.mula, r.tamat);
-  $('btnSimpan').disabled = true;
-  try {
-    await api({ action: 'simpan', entri: r });
-    entri = entri.filter(x => x.id !== r.id).concat(r);
-    localStorage.setItem('tingkatanAkhir', r.tingkatan);
-    localStorage.setItem('mulaAkhir', r.mula);
-    mesej(idUbah ? 'Dikemas kini' : 'Disimpan');
-    bulan = r.tarikh.slice(0, 7);
-    resetCatat(); lukis();
-    $('tarikh').value = r.tarikh; paparTarikh(); // kekalkan tarikh untuk isi beberapa kelas lepas sekali gus
-  } catch (err) { mesej(err.message); }
-  kemasRingkas();
+  setGilir(gilir().filter(x => x.id !== r.id).concat(r));
+  entri = entri.filter(x => x.id !== r.id).concat(r);
+  localStorage.setItem('tingkatanAkhir', r.tingkatan);
+  localStorage.setItem('mulaAkhir', r.mula);
+  mesej(idUbah ? 'Dikemas kini' : 'Disimpan');
+  bulan = r.tarikh.slice(0, 7);
+  resetCatat(); lukis();
+  $('tarikh').value = r.tarikh; paparTarikh(); // kekalkan tarikh untuk isi beberapa kelas lepas sekali gus
+  hantar();
 };
 
 // ---- Senarai & Borang ----
@@ -376,6 +402,7 @@ window.padam = async id => {
   const x = entri.find(e => e.id === id);
   if (!confirm(`Padam rekod ${tarikhTeks(x.tarikh)} ${x.tingkatan}?`)) return;
   try {
+    setGilir(gilir().filter(x => x.id !== id));
     await api({ action: 'padam', entri: { id } });
     entri = entri.filter(e => e.id !== id);
     lukis(); mesej('Dipadam');

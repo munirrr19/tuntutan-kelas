@@ -115,17 +115,18 @@ function doPost(e) {
 
     if (b.action === 'simpan' || b.action === 'padam') {
       const sh = ss.getSheetByName(DATA);
-      const rows = sh.getRange(1, 1, sh.getLastRow(), LAJUR.length).getValues();
-      const idx = rows.findIndex(r => String(r[0]) === String(b.entri.id));
+      // Cari id terus dalam lajur A; tidak perlu baca semua rekod (data membesar setiap bulan)
+      const sel = sh.getRange('A:A').createTextFinder(String(b.entri.id)).matchEntireCell(true).findNext();
+      const baris = sel && sel.getRow() > 1 ? sel.getRow() : 0;
       // Guru hanya boleh ubah rekod sendiri (admin juga)
-      if (idx > 0 && String(rows[idx][7]) !== guru.id) throw new Error('Bukan rekod anda');
+      if (baris && String(sh.getRange(baris, 8).getValue()) !== guru.id) throw new Error('Bukan rekod anda');
       if (b.action === 'padam') {
-        if (idx > 0) sh.deleteRow(idx + 1);
+        if (baris) sh.deleteRow(baris);
       } else {
         const r = { ...b.entri, guru: guru.id };
         if (!/^\d{4}-\d{2}-\d{2}$/.test(r.tarikh) || !(Number(r.jam) > 0)) throw new Error('Data tidak sah');
         const nilai = [LAJUR.map(k => String(r[k] ?? ''))];
-        if (idx > 0) sh.getRange(idx + 1, 1, 1, LAJUR.length).setValues(nilai);
+        if (baris) sh.getRange(baris, 1, 1, LAJUR.length).setValues(nilai);
         else sh.getRange(sh.getLastRow() + 1, 1, 1, LAJUR.length).setNumberFormat('@').setValues(nilai);
       }
     } else if (b.action === 'profil') {
