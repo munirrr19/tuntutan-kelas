@@ -1,1 +1,5 @@
 .claude/
+# Data peribadi kakitangan: jangan push ke repo public
+senarai_*.md
+*.xlsx
+*.csv
