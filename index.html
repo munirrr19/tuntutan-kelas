@@ -34,10 +34,7 @@
   .dua { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .pantas { display: flex; gap: 8px; margin-top: 8px; }
   .pantas button { flex: 1; }
-  .btn { padding: 10px 14px; font: inherit; border-radius: 8px; border: 1px solid var(--hijau); background: #fff; color: var(--hijau); cursor: pointer; text-decoration: none; text-align: center; }
-  .kerap { display: grid; gap: 6px; }
-  .kerap .btn { text-align: left; }
-  button.utama { background: var(--hijau); color: #fff; width: 100%; margin-top: 16px; padding: 12px; font-weight: 600; }
+  .btn { padding: 10px 14px; font: inherit; border-radius: 8px; border: 1px solid var(--hijau); background: #fff; color: var(--hijau); cursor: pointer; text-decoration: none; text-align: center; }  button.utama { background: var(--hijau); color: #fff; width: 100%; margin-top: 16px; padding: 12px; font-weight: 600; }
   button.bahaya { border-color: var(--merah); color: var(--merah); }
   button:disabled { opacity: .5; }
   .ringkas { background: var(--hijau-muda); border-radius: 8px; padding: 10px; margin-top: 12px; text-align: center; font-weight: 600; color: var(--hijau); }
@@ -103,7 +100,6 @@
         <div id="tarikhPapar"></div>
         <input type="date" id="tarikh" required aria-label="Tarikh">
       </div>
-      <div id="kerapKotak" hidden><label>Kelas biasa anda</label><div class="kerap" id="kerap"></div></div>
       <label for="tingkatan">Tingkatan</label>
       <select id="tingkatan" required></select>
       <div class="dua">
@@ -367,9 +363,7 @@ function lukis() {
     : `<small>Semak borang di bawah. Bila semua kelas ${namaBulan()} sudah diisi, tekan SELESAI supaya Setiausaha boleh proses tuntutan.</small>
        <button class="btn utama" ${senarai.length ? '' : 'disabled'} onclick="tandaSelesai(false)">SELESAI</button>`;
 
-  $('borang').innerHTML = borangHTML(guru, senarai);
-  lukisKerap();
-  if (guru.admin) lukisAdmin();
+  $('borang').innerHTML = borangHTML(guru, senarai);  if (guru.admin) lukisAdmin();
 }
 
 // Guru yang ada rekod bulan ini, ikut nama
@@ -420,17 +414,6 @@ window.muatTurunExcel = () => {
   a.download = `tuntutan-${bulan}.csv`;
   a.click();
 };
-
-// Kelas biasa: 3 gabungan tingkatan + masa yang paling kerap diisi guru ini
-let kerap = [];
-function lukisKerap() {
-  const kira = {};
-  entri.filter(x => x.guru === guru.id).forEach(x => { const k = [x.tingkatan, x.mula, x.tamat].join('|'); kira[k] = (kira[k] || 0) + 1; });
-  kerap = Object.entries(kira).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k]) => k.split('|'));
-  $('kerapKotak').hidden = !kerap.length;
-  $('kerap').innerHTML = kerap.map(([t, m, s], i) => `<button type="button" class="btn" onclick="pilihKerap(${i})">${esc(t)} · ${masaTeks(m)} – ${masaTeks(s)}</button>`).join('');
-}
-window.pilihKerap = i => { [$('tingkatan').value, $('mula').value, $('tamat').value] = kerap[i]; kemasRingkas(); };
 
 const KEPALA = `<div class="kepala"><img src="logo.png" alt=""><div>
       <div class="ar">معهد تحفيظ القرءان والقراءات</div>
