@@ -130,6 +130,7 @@
       <input type="month" class="pilihBulan" aria-label="Bulan">
       <button class="btn" onclick="print()">Cetak / PDF</button>
     </div>
+    <div class="kad tiada-cetak" id="kotakSelesai"></div>
     <div class="pratonton" id="borang"></div>
   </section>
 
@@ -164,6 +165,7 @@ const API = 'https://script.google.com/macros/s/AKfycbw9zaNiQtD7Z2TaqZCky1uiwonQ
 let entri = [];        // guru: rekod sendiri; admin: rekod semua guru
 let guru = {};         // profil pengguna ini
 let semuaGuru = [];    // admin sahaja
+let selesai = [];      // {guru, bulan, masa}: bulan yang guru tanda SELESAI
 let kadarSejam = 30;
 let pilihCetak = null; // admin: id guru untuk dicetak seorang, null = semua
 let idUbah = null;
@@ -220,6 +222,7 @@ async function muat() {
     entri = d.entri.filter(x => !gilir().some(q => q.id === x.id)).concat(gilir().map(q => ({ ...q, guru: guru.id })));
     kadarSejam = d.kadar;
     semuaGuru = d.semuaGuru || [];
+    selesai = d.selesai || [];
     $('navAdmin').hidden = !guru.admin;
     isiTetapan(); lukis(); kemasRingkas();
     hantar();
@@ -314,6 +317,7 @@ $('fCatat').onsubmit = async e => {
     guru: guru.id,
   };
   r.jam = kiraJam(r.mula, r.tamat);
+  if (statusSelesai(guru.id, r.tarikh.slice(0, 7))) return mesej('Bulan ini sudah SELESAI. Buka semula di tab Borang untuk menambah atau mengubah.');
   setGilir(gilir().filter(x => x.id !== r.id).concat(r));
   entri = entri.filter(x => x.id !== r.id).concat(r);
   localStorage.setItem('tingkatanAkhir', r.tingkatan);
@@ -328,19 +332,30 @@ $('fCatat').onsubmit = async e => {
 // ---- Senarai & Borang ----
 const entriBulan = idGuru => entri.filter(x => x.guru === idGuru && x.tarikh.startsWith(bulan)).sort((a, b) => (a.tarikh + a.mula).localeCompare(b.tarikh + b.mula));
 const jumlah = senarai => senarai.reduce((s, x) => s + x.jam, 0);
+const statusSelesai = (idGuru, b = bulan) => selesai.find(s => s.guru === idGuru && s.bulan === b);
+const namaBulan = () => BULAN[bulan.slice(5) - 1] + ' ' + bulan.slice(0, 4);
+const teksSelesai = s => `✓ SELESAI · ${tarikhTeks(s.masa.slice(0, 10))}${s.masa.slice(10)}`;
 
 function lukis() {
   document.querySelectorAll('.pilihBulan').forEach(i => i.value = bulan);
   const senarai = entriBulan(guru.id);
   const jumlahJam = jumlah(senarai);
+  const s = statusSelesai(guru.id);
 
-  $('senarai').innerHTML = senarai.length
+  $('senarai').innerHTML = (s ? `<div class="ringkas" style="margin:0 0 4px">${teksSelesai(s)}</div>` : '')
+    + (senarai.length
     ? senarai.map(x => `<div class="item"><div><b>${tarikhTeks(x.tarikh)} · ${esc(x.tingkatan)}</b>
         <small>${masaTeks(x.mula)} – ${masaTeks(x.tamat)} · ${jamTeks(x.jam)} jam${x.catatan ? ' · ' + esc(x.catatan) : ''}</small></div>
-        <button class="btn" onclick="ubah('${x.id}')">Ubah</button>
-        <button class="btn bahaya" onclick="padam('${x.id}')">Padam</button></div>`).join('')
+        ${s ? '' : `<button class="btn" onclick="ubah('${x.id}')">Ubah</button>
+        <button class="btn bahaya" onclick="padam('${x.id}')">Padam</button>`}</div>`).join('')
       + `<div class="jumlah">${jamTeks(jumlahJam)} jam × RM${kadar()} = RM${rm(jumlahJam * kadar())}</div>`
-    : '<div class="kosong">Tiada rekod untuk bulan ini</div>';
+    : '<div class="kosong">Tiada rekod untuk bulan ini</div>');
+
+  $('kotakSelesai').innerHTML = s
+    ? `<div class="ringkas" style="margin:0">${teksSelesai(s)}</div>
+       <button class="btn" style="width:100%;margin-top:8px" onclick="tandaSelesai(true)">Buka semula untuk ubah</button>`
+    : `<small>Semak borang di bawah. Bila semua kelas ${namaBulan()} sudah diisi, tekan SELESAI supaya Setiausaha boleh proses tuntutan.</small>
+       <button class="btn utama" ${senarai.length ? '' : 'disabled'} onclick="tandaSelesai(false)">SELESAI</button>`;
 
   $('borang').innerHTML = borangHTML(guru, senarai);
   if (guru.admin) lukisAdmin();
@@ -350,11 +365,13 @@ function lukisAdmin() {
   const ada = semuaGuru.map(g => ({ g, senarai: entriBulan(g.id) })).filter(x => x.senarai.length)
     .sort((a, b) => a.g.nama.localeCompare(b.g.nama));
   const jam = ada.reduce((s, x) => s + jumlah(x.senarai), 0);
+  const siap = ada.filter(x => statusSelesai(x.g.id)).length;
   $('ringkasAdmin').innerHTML = ada.length
     ? ada.map(({ g, senarai }) => `<div class="item"><div><b>${esc(g.nama) || '(tiada nama)'}</b>
-        <small>${senarai.length} kelas · ${jamTeks(jumlah(senarai))} jam · RM${rm(jumlah(senarai) * kadar())}</small></div>
+        <small>${senarai.length} kelas · ${jamTeks(jumlah(senarai))} jam · RM${rm(jumlah(senarai) * kadar())}</small>
+        ${statusSelesai(g.id) ? '<small style="color:var(--hijau);font-weight:600">✓ Selesai</small>' : '<small style="color:var(--merah)">Belum selesai</small>'}</div>
         <button class="btn" onclick="cetakGuru('${g.id}')">Cetak</button></div>`).join('')
-      + `<div class="jumlah">${ada.length} guru · ${jamTeks(jam)} jam · RM${rm(jam * kadar())}</div>`
+      + `<div class="jumlah">${siap}/${ada.length} guru selesai · ${jamTeks(jam)} jam · RM${rm(jam * kadar())}</div>`
     : '<div class="kosong">Tiada rekod untuk bulan ini</div>';
   $('borangAdmin').innerHTML = ada.filter(x => !pilihCetak || x.g.id === pilihCetak).map(x => borangHTML(x.g, x.senarai)).join('');
 }
@@ -406,6 +423,19 @@ window.padam = async id => {
     await api({ action: 'padam', entri: { id } });
     entri = entri.filter(e => e.id !== id);
     lukis(); mesej('Dipadam');
+  } catch (err) { mesej(err.message); }
+};
+window.tandaSelesai = async batal => {
+  if (!confirm(batal ? `Buka semula ${namaBulan()} untuk ubah? Status akan jadi BELUM SELESAI.`
+                     : `Tanda ${namaBulan()} sebagai SELESAI? Rekod bulan ini dikunci selepas ini.`)) return;
+  mesej('Menghantar...');
+  try {
+    await hantar();
+    if (gilir().some(q => q.tarikh.startsWith(bulan))) throw new Error('Ada rekod bulan ini belum dihantar. Cuba lagi bila ada internet.');
+    await api({ action: 'selesai', bulan, batal });
+    selesai = selesai.filter(s => !(s.guru === guru.id && s.bulan === bulan));
+    if (!batal) selesai.push({ guru: guru.id, bulan, masa: new Date().toLocaleString('sv').slice(0, 16) });
+    lukis(); mesej(batal ? 'Dibuka semula' : 'Ditanda SELESAI');
   } catch (err) { mesej(err.message); }
 };
 document.querySelectorAll('.pilihBulan').forEach(i => i.onchange = () => { if (i.value) { bulan = i.value; lukis(); } });

@@ -5,6 +5,7 @@ const SITE = 'https://munirrr19.github.io/tuntutan-kelas/';
 const DATA = 'Kehadiran';
 const GURU = 'Guru';
 const TETAPAN = 'Tetapan';
+const SELESAI = 'Selesai'; // guru | bulan (yyyy-mm) | masa: bulan yang guru tanda siap untuk dituntut
 const LAJUR = ['id', 'tarikh', 'tingkatan', 'mula', 'tamat', 'jam', 'catatan', 'guru'];
 const LAJUR_GURU = ['id', 'nama', 'kp', 'telefon', 'token', 'admin', 'link'];
 
@@ -60,6 +61,17 @@ function janaLink() {
   }));
 }
 
+function helaiSelesai_() {
+  const ss = SpreadsheetApp.getActive();
+  let sh = ss.getSheetByName(SELESAI);
+  if (!sh) {
+    sh = ss.insertSheet(SELESAI);
+    sh.getRange('A:C').setNumberFormat('@');
+    sh.getRange(1, 1, 1, 3).setValues([['guru', 'bulan', 'masa']]);
+  }
+  return sh;
+}
+
 function baris_(nama) {
   return SpreadsheetApp.getActive().getSheetByName(nama).getDataRange().getValues().slice(1);
 }
@@ -94,7 +106,10 @@ function doGet(e) {
     }).filter(o => guru.admin || o.guru === guru.id);
     const t = {};
     baris_(TETAPAN).forEach(r => { if (r[0]) t[r[0]] = String(r[1]); });
-    const res = { ok: true, guru, kadar: Number(t.kadar) || 30, entri };
+    const selesai = helaiSelesai_().getDataRange().getValues().slice(1)
+      .filter(r => r[0] && (guru.admin || String(r[0]) === guru.id))
+      .map(r => ({ guru: String(r[0]), bulan: String(r[1]), masa: String(r[2]) }));
+    const res = { ok: true, guru, kadar: Number(t.kadar) || 30, entri, selesai };
     if (guru.admin) {
       res.semuaGuru = baris_(GURU).filter(r => r[0]).map(profil_);
     }
@@ -112,19 +127,27 @@ function doPost(e) {
     const b = JSON.parse(e.postData.contents);
     const guru = cariGuru_(b.token);
     const ss = SpreadsheetApp.getActive();
+    const selesai = helaiSelesai_().getDataRange().getValues();
+    const iSelesai = bulan => selesai.findIndex(r => String(r[0]) === guru.id && String(r[1]) === bulan);
+    const kunci = tarikh => { if (iSelesai(String(tarikh).slice(0, 7)) > 0) throw new Error('Bulan ini sudah ditanda SELESAI'); };
 
     if (b.action === 'simpan' || b.action === 'padam') {
       const sh = ss.getSheetByName(DATA);
       // Cari id terus dalam lajur A; tidak perlu baca semua rekod (data membesar setiap bulan)
       const sel = sh.getRange('A:A').createTextFinder(String(b.entri.id)).matchEntireCell(true).findNext();
       const baris = sel && sel.getRow() > 1 ? sel.getRow() : 0;
-      // Guru hanya boleh ubah rekod sendiri (admin juga)
-      if (baris && String(sh.getRange(baris, 8).getValue()) !== guru.id) throw new Error('Bukan rekod anda');
+      if (baris) {
+        const lama = sh.getRange(baris, 1, 1, LAJUR.length).getValues()[0];
+        // Guru hanya boleh ubah rekod sendiri (admin juga)
+        if (String(lama[7]) !== guru.id) throw new Error('Bukan rekod anda');
+        kunci(lama[1]);
+      }
       if (b.action === 'padam') {
         if (baris) sh.deleteRow(baris);
       } else {
         const r = { ...b.entri, guru: guru.id };
         if (!/^\d{4}-\d{2}-\d{2}$/.test(r.tarikh) || !(Number(r.jam) > 0)) throw new Error('Data tidak sah');
+        kunci(r.tarikh);
         const nilai = [LAJUR.map(k => String(r[k] ?? ''))];
         if (baris) sh.getRange(baris, 1, 1, LAJUR.length).setValues(nilai);
         else sh.getRange(sh.getLastRow() + 1, 1, 1, LAJUR.length).setNumberFormat('@').setValues(nilai);
@@ -132,6 +155,12 @@ function doPost(e) {
     } else if (b.action === 'profil') {
       const p = b.profil;
       ss.getSheetByName(GURU).getRange(guru.baris, 2, 1, 3).setNumberFormat('@').setValues([[String(p.nama), String(p.kp), String(p.telefon)]]);
+    } else if (b.action === 'selesai') {
+      if (!/^\d{4}-\d{2}$/.test(b.bulan)) throw new Error('Data tidak sah');
+      const sh = helaiSelesai_(), i = iSelesai(b.bulan);
+      if (b.batal) { if (i > 0) sh.deleteRow(i + 1); }
+      else if (i < 0) sh.getRange(sh.getLastRow() + 1, 1, 1, 3).setNumberFormat('@')
+        .setValues([[guru.id, b.bulan, Utilities.formatDate(new Date(), 'Asia/Kuala_Lumpur', 'yyyy-MM-dd HH:mm')]]);
     } else {
       throw new Error('Tindakan tidak dikenali');
     }

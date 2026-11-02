@@ -29,7 +29,9 @@ Dalam tab **Tetapan**, tambah baris `kadar` dengan nilai `30` (atau kadar baru).
 1. Buka link peribadi daripada admin. Anda hanya perlu buat ini sekali di setiap telefon.
 2. Di tab **Tetapan**, semak Nama, No KP dan No Telefon.
 3. **Catat:** isi selepas setiap kelas.
-4. **Borang:** di hujung bulan, pilih bulan dan tekan **Cetak / PDF**.
+4. **Borang:** di hujung bulan, semak borang dan tekan **SELESAI**. Rekod bulan itu akan dikunci, dan Setiausaha boleh nampak borang anda sudah siap. Jika perlu ubah, tekan **Buka semula untuk ubah**.
+
+Di tab **Admin**, setiap guru ditunjuk sebagai ✓ Selesai atau Belum selesai. Status ini disimpan dalam helaian `Selesai` di Sheet.
 
 Di telefon, pilih **Add to Home screen** supaya website ini boleh dibuka seperti app.
 
