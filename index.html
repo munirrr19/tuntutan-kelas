@@ -444,6 +444,7 @@ function borangHTML(profil, senarai) {
   const jumlahJam = jumlah(senarai);
   const [thn, bln] = bulan.split('-');
   const halaman = pecah(senarai, BARIS_SEHALAMAN);
+  const selesaiPada = statusSelesai(profil.id); // tarikh guru tekan SELESAI
   return halaman.map((h, hi) => `<div class="halaman">${KEPALA}
     <div class="tajuk">BORANG TUNTUTAN MENGAJAR KELAS AL-QURAN</div>
     <div class="medan" style="justify-content:flex-end"><b>BULAN :</b><span style="flex:0 0 35mm">${BULAN[bln - 1].toUpperCase()}</span><b>TAHUN :</b><span style="flex:0 0 25mm">${thn}</span></div>
@@ -461,7 +462,8 @@ function borangHTML(profil, senarai) {
     <div class="kotak">JUMLAH KESELURUHAN JAM MENGAJAR <b>${jamTeks(jumlahJam)}</b> JAM X RM${kadar()}<br>
       <b style="font-size:12pt">JUMLAH KESELURUHAN, RM : ${rm(jumlahJam * kadar())}</b></div>
     <div class="tt">
-      <div>Nama dan tandatangan guru<div class="ruang"></div>( ${esc(profil.nama) || '&nbsp;'.repeat(60)} )</div>
+      <div>Nama dan tandatangan guru<div class="ruang"></div>( ${esc(profil.nama) || '&nbsp;'.repeat(60)} )
+        <br>Tarikh : ${selesaiPada ? tarikhTeks(selesaiPada.masa.slice(0, 10)) : '..............................'}</div>
       <div>Disemak oleh :<div class="ruang"></div>(......................................................)<br>Setiausaha Al - Quran<br>Maahad Tahfiz Al Quran Wal Qiraat</div></div>
     <div style="text-align:right;margin-top:5mm">Tarikh : ..............................</div>`}
   </div>`).join('');
