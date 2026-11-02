@@ -286,6 +286,7 @@ $('fCatat').onsubmit = async e => {
     mesej(idUbah ? 'Dikemas kini' : 'Disimpan');
     bulan = r.tarikh.slice(0, 7);
     resetCatat(); lukis();
+    $('tarikh').value = r.tarikh; paparTarikh(); // kekalkan tarikh untuk isi beberapa kelas lepas sekali gus
   } catch (err) { mesej(err.message); }
   kemasRingkas();
 };
