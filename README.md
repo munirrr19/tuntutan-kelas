@@ -31,7 +31,9 @@ Dalam tab **Tetapan**, tambah baris `kadar` dengan nilai `30` (atau kadar baru).
 3. **Catat:** isi selepas setiap kelas.
 4. **Borang:** di hujung bulan, semak borang dan tekan **SELESAI**. Rekod bulan itu akan dikunci, dan Setiausaha boleh nampak borang anda sudah siap. Jika perlu ubah, tekan **Buka semula untuk ubah**.
 
-Di tab **Admin**, setiap guru ditunjuk sebagai ✓ Selesai atau Belum selesai. Status ini disimpan dalam helaian `Selesai` di Sheet.
+Di tab **Admin**, setiap guru ditunjuk sebagai ✓ Selesai atau Belum selesai. Guru yang belum selesai berada di atas. Status ini disimpan dalam helaian `Selesai` di Sheet.
+
+Untuk bendahari, gunakan **Ringkasan bayaran** untuk mencetak satu halaman senarai nama, No KP, jam dan RM semua guru. Gunakan pula **Muat turun Excel** untuk mendapatkan fail yang sama dalam bentuk Excel.
 
 Di telefon, pilih **Add to Home screen** supaya website ini boleh dibuka seperti app.
 

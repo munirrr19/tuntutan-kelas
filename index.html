@@ -34,7 +34,9 @@
   .dua { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .pantas { display: flex; gap: 8px; margin-top: 8px; }
   .pantas button { flex: 1; }
-  button.btn { padding: 10px 14px; font: inherit; border-radius: 8px; border: 1px solid var(--hijau); background: #fff; color: var(--hijau); cursor: pointer; }
+  .btn { padding: 10px 14px; font: inherit; border-radius: 8px; border: 1px solid var(--hijau); background: #fff; color: var(--hijau); cursor: pointer; text-decoration: none; text-align: center; }
+  .kerap { display: grid; gap: 6px; }
+  .kerap .btn { text-align: left; }
   button.utama { background: var(--hijau); color: #fff; width: 100%; margin-top: 16px; padding: 12px; font-weight: 600; }
   button.bahaya { border-color: var(--merah); color: var(--merah); }
   button:disabled { opacity: .5; }
@@ -101,6 +103,7 @@
         <div id="tarikhPapar"></div>
         <input type="date" id="tarikh" required aria-label="Tarikh">
       </div>
+      <div id="kerapKotak" hidden><label>Kelas biasa anda</label><div class="kerap" id="kerap"></div></div>
       <label for="tingkatan">Tingkatan</label>
       <select id="tingkatan" required></select>
       <div class="dua">
@@ -148,6 +151,10 @@
       <input type="month" class="pilihBulan" aria-label="Bulan">
       <button class="btn" onclick="cetakGuru(null)">Cetak semua</button>
     </div>
+    <div class="pantas tiada-cetak" style="margin:0 0 12px">
+      <button class="btn" onclick="cetakRingkasan()">Ringkasan bayaran</button>
+      <button class="btn" onclick="muatTurunExcel()">Muat turun Excel</button>
+    </div>
     <div class="kad tiada-cetak" id="ringkasAdmin"></div>
     <div class="pratonton" id="borangAdmin"></div>
   </section>
@@ -190,7 +197,8 @@ console.assert(kiraJam('08:00', '10:00') === 2 && kiraJam('14:00', '14:30') === 
 console.assert(masaTeks('08:00') === '8.00 pg' && masaTeks('12:30') === '12.30 ptg' && masaTeks('20:00') === '8.00 mlm', 'masaTeks');
 console.assert(kiraJam('08:15', '10:15') === 2 && jamTeks(kiraJam('08:00', '08:45')) === '0.75', 'suku jam');
 console.assert(pecah([1,2,3], 2).length === 2 && pecah([], 20).length === 1, 'pecah');
-
+const bertindih = (a, b) => minit(a.mula) < minit(b.tamat) && minit(b.mula) < minit(a.tamat);
+console.assert(bertindih({ mula: '08:00', tamat: '10:00' }, { mula: '09:30', tamat: '11:00' }) && !bertindih({ mula: '08:00', tamat: '10:00' }, { mula: '10:00', tamat: '12:00' }), 'bertindih');
 function mesej(teks) {
   const m = $('mesej'); m.textContent = teks; m.style.display = 'block';
   clearTimeout(mesej.t); mesej.t = setTimeout(() => m.style.display = 'none', 2500);
@@ -318,6 +326,8 @@ $('fCatat').onsubmit = async e => {
   };
   r.jam = kiraJam(r.mula, r.tamat);
   if (statusSelesai(guru.id, r.tarikh.slice(0, 7))) return mesej('Bulan ini sudah SELESAI. Buka semula di tab Borang untuk menambah atau mengubah.');
+  const tindih = entri.find(x => x.guru === guru.id && x.id !== r.id && x.tarikh === r.tarikh && bertindih(x, r));
+  if (tindih && !confirm(`Masa bertindih dengan rekod ${tindih.tingkatan} ${masaTeks(tindih.mula)} – ${masaTeks(tindih.tamat)} pada tarikh yang sama. Simpan juga?`)) return;
   setGilir(gilir().filter(x => x.id !== r.id).concat(r));
   entri = entri.filter(x => x.id !== r.id).concat(r);
   localStorage.setItem('tingkatanAkhir', r.tingkatan);
@@ -358,33 +368,78 @@ function lukis() {
        <button class="btn utama" ${senarai.length ? '' : 'disabled'} onclick="tandaSelesai(false)">SELESAI</button>`;
 
   $('borang').innerHTML = borangHTML(guru, senarai);
+  lukisKerap();
   if (guru.admin) lukisAdmin();
 }
 
+// Guru yang ada rekod bulan ini, ikut nama
+const senaraiBayaran = () => semuaGuru.map(g => ({ g, senarai: entriBulan(g.id) })).filter(x => x.senarai.length)
+  .sort((a, b) => a.g.nama.localeCompare(b.g.nama));
+
 function lukisAdmin() {
-  const ada = semuaGuru.map(g => ({ g, senarai: entriBulan(g.id) })).filter(x => x.senarai.length)
-    .sort((a, b) => a.g.nama.localeCompare(b.g.nama));
+  // Semua guru dipaparkan; yang belum selesai di atas
+  const semua = semuaGuru.map(g => ({ g, senarai: entriBulan(g.id), s: statusSelesai(g.id) }))
+    .sort((a, b) => !!a.s - !!b.s || a.g.nama.localeCompare(b.g.nama));
+  const ada = senaraiBayaran();
   const jam = ada.reduce((s, x) => s + jumlah(x.senarai), 0);
-  const siap = ada.filter(x => statusSelesai(x.g.id)).length;
-  $('ringkasAdmin').innerHTML = ada.length
-    ? ada.map(({ g, senarai }) => `<div class="item"><div><b>${esc(g.nama) || '(tiada nama)'}</b>
-        <small>${senarai.length} kelas · ${jamTeks(jumlah(senarai))} jam · RM${rm(jumlah(senarai) * kadar())}</small>
-        ${statusSelesai(g.id) ? '<small style="color:var(--hijau);font-weight:600">✓ Selesai</small>' : '<small style="color:var(--merah)">Belum selesai</small>'}</div>
-        <button class="btn" onclick="cetakGuru('${g.id}')">Cetak</button></div>`).join('')
-      + `<div class="jumlah">${siap}/${ada.length} guru selesai · ${jamTeks(jam)} jam · RM${rm(jam * kadar())}</div>`
-    : '<div class="kosong">Tiada rekod untuk bulan ini</div>';
+  const siap = semua.filter(x => x.s).length;
+  $('ringkasAdmin').innerHTML = semua.length
+    ? semua.map(({ g, senarai, s }) => `<div class="item"><div><b>${esc(g.nama) || '(tiada nama)'}</b>
+        <small>${senarai.length ? `${senarai.length} kelas · ${jamTeks(jumlah(senarai))} jam · RM${rm(jumlah(senarai) * kadar())}` : 'Tiada rekod'}</small>
+        ${s ? '<small style="color:var(--hijau);font-weight:600">✓ Selesai</small>' : '<small style="color:var(--merah)">Belum selesai</small>'}</div>        ${senarai.length ? `<button class="btn" onclick="cetakGuru('${g.id}')">Cetak</button>` : ''}</div>`).join('')
+      + `<div class="jumlah">${siap}/${semua.length} guru selesai · ${jamTeks(jam)} jam · RM${rm(jam * kadar())}</div>`
+    : '<div class="kosong">Tiada guru</div>';
   $('borangAdmin').innerHTML = ada.filter(x => !pilihCetak || x.g.id === pilihCetak).map(x => borangHTML(x.g, x.senarai)).join('');
 }
 window.cetakGuru = id => { pilihCetak = id; lukisAdmin(); print(); pilihCetak = null; lukisAdmin(); };
 
+// shortcut: satu halaman muat ~35 guru; pecah halaman jika guru bertambah melebihi itu
+function ringkasanHTML() {
+  const ada = senaraiBayaran(), jam = ada.reduce((s, x) => s + jumlah(x.senarai), 0);
+  return `<div class="halaman">${KEPALA}
+    <div class="tajuk">RINGKASAN TUNTUTAN MENGAJAR KELAS AL-QURAN</div>
+    <div class="medan" style="justify-content:center"><b>BULAN : ${namaBulan().toUpperCase()}</b></div>
+    <table><thead><tr><th style="width:7%">BIL</th><th>NAMA</th><th style="width:20%">NO KAD PENGENALAN</th><th style="width:9%">JAM</th><th style="width:14%">JUMLAH (RM)</th><th style="width:12%">STATUS</th></tr></thead>
+    <tbody>${ada.map(({ g, senarai }, i) => `<tr><td>${i + 1}</td><td class="catatan">${esc(g.nama)}</td><td>${esc(g.kp)}</td><td>${jamTeks(jumlah(senarai))}</td>
+      <td>${rm(jumlah(senarai) * kadar())}</td><td>${statusSelesai(g.id) ? 'Selesai' : 'Belum'}</td></tr>`).join('')}
+    <tr><td colspan="3"><b>JUMLAH (${ada.length} GURU)</b></td><td><b>${jamTeks(jam)}</b></td><td><b>${rm(jam * kadar())}</b></td><td></td></tr></tbody></table>
+    <div class="tt"><div>Disediakan oleh :<div class="ruang"></div>(......................................................)<br>Setiausaha Al - Quran</div>
+      <div>Tarikh : ..............................</div></div>
+  </div>`;
+}
+window.cetakRingkasan = () => { $('borangAdmin').innerHTML = ringkasanHTML(); print(); lukisAdmin(); };
+
+window.muatTurunExcel = () => {
+  const teks = v => /^[=+\-@]/.test(v) ? "'" + v : v; // elak Excel baca nama sebagai formula
+  const baris = [['Bil', 'Nama', 'No KP', 'No Telefon', 'Jam', 'Jumlah (RM)', 'Status']].concat(senaraiBayaran().map(({ g, senarai }, i) =>
+    [i + 1, teks(g.nama), `="${g.kp}"`, `="${g.telefon}"`, jamTeks(jumlah(senarai)), rm(jumlah(senarai) * kadar()), statusSelesai(g.id) ? 'Selesai' : 'Belum selesai']));
+  // BOM supaya Excel baca UTF-8; ="..." supaya sifar di depan KP/telefon kekal
+  const csv = '﻿' + baris.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  a.download = `tuntutan-${bulan}.csv`;
+  a.click();
+};
+
+// Kelas biasa: 3 gabungan tingkatan + masa yang paling kerap diisi guru ini
+let kerap = [];
+function lukisKerap() {
+  const kira = {};
+  entri.filter(x => x.guru === guru.id).forEach(x => { const k = [x.tingkatan, x.mula, x.tamat].join('|'); kira[k] = (kira[k] || 0) + 1; });
+  kerap = Object.entries(kira).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k]) => k.split('|'));
+  $('kerapKotak').hidden = !kerap.length;
+  $('kerap').innerHTML = kerap.map(([t, m, s], i) => `<button type="button" class="btn" onclick="pilihKerap(${i})">${esc(t)} · ${masaTeks(m)} – ${masaTeks(s)}</button>`).join('');
+}
+window.pilihKerap = i => { [$('tingkatan').value, $('mula').value, $('tamat').value] = kerap[i]; kemasRingkas(); };
+
+const KEPALA = `<div class="kepala"><img src="logo.png" alt=""><div>
+      <div class="ar">معهد تحفيظ القرءان والقراءات</div>
+      <b>MAAHAD TAHFIZ AL QURAN WAL QIRAAT</b><b>16600 PULAI CHONDONG</b></div></div>`;
 function borangHTML(profil, senarai) {
   const jumlahJam = jumlah(senarai);
   const [thn, bln] = bulan.split('-');
   const halaman = pecah(senarai, BARIS_SEHALAMAN);
-  return halaman.map((h, hi) => `<div class="halaman">
-    <div class="kepala"><img src="logo.png" alt=""><div>
-      <div class="ar">معهد تحفيظ القرءان والقراءات</div>
-      <b>MAAHAD TAHFIZ AL QURAN WAL QIRAAT</b><b>16600 PULAI CHONDONG</b></div></div>
+  return halaman.map((h, hi) => `<div class="halaman">${KEPALA}
     <div class="tajuk">BORANG TUNTUTAN MENGAJAR KELAS AL-QURAN</div>
     <div class="medan" style="justify-content:flex-end"><b>BULAN :</b><span style="flex:0 0 35mm">${BULAN[bln - 1].toUpperCase()}</span><b>TAHUN :</b><span style="flex:0 0 25mm">${thn}</span></div>
     <div class="medan"><b>NAMA :</b><span>${esc(profil.nama)}</span></div>
