@@ -22,6 +22,10 @@
   label { display: block; font-size: .85rem; font-weight: 600; margin: 12px 0 4px; }
   label:first-child { margin-top: 0; }
   input, select, textarea { width: 100%; padding: 10px; font: inherit; border: 1px solid var(--garis); border-radius: 8px; background: #fff; }
+  /* Input tarikh asal (format ikut bahasa browser) dilitupi paparan hari/bulan/tahun */
+  .tarikh-kotak { position: relative; }
+  #tarikhPapar { padding: 10px; border: 1px solid var(--garis); border-radius: 8px; background: #fff; }
+  #tarikh { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
   .dua { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .pantas { display: flex; gap: 8px; margin-top: 8px; }
   .pantas button { flex: 1; }
@@ -87,7 +91,10 @@
   <section id="tab-catat" class="aktif">
     <form id="fCatat" class="kad">
       <label for="tarikh">Tarikh</label>
-      <input type="date" id="tarikh" required>
+      <div class="tarikh-kotak">
+        <div id="tarikhPapar"></div>
+        <input type="date" id="tarikh" required aria-label="Tarikh">
+      </div>
       <label for="tingkatan">Tingkatan</label>
       <select id="tingkatan" required></select>
       <div class="dua">
@@ -221,6 +228,14 @@ const PILIHAN_MASA = Array.from({ length: (23 * 60 - 6 * 60) / 15 + 1 }, (_, i) 
 $('tingkatan').innerHTML = TINGKATAN.map(t => `<option>${t}</option>`).join('');
 for (const id of ['mula', 'tamat']) $(id).innerHTML = PILIHAN_MASA.map(t => `<option value="${t}">${masaTeks(t)}</option>`).join('');
 
+const HARI = ['Ahad', 'Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu'];
+function paparTarikh() {
+  const v = $('tarikh').value;
+  $('tarikhPapar').textContent = v ? `${tarikhTeks(v)} (${HARI[new Date(v + 'T00:00').getDay()]})` : 'Pilih tarikh';
+}
+$('tarikh').onchange = paparTarikh;
+$('tarikh').onclick = () => { try { $('tarikh').showPicker(); } catch {} };
+
 function setTamat(minitTambah) {
   const t = Math.min(minit($('mula').value) + minitTambah, 23 * 60);
   $('tamat').value = hhmm(t);
@@ -239,6 +254,7 @@ function resetCatat() {
   $('catatan').value = '';
   $('btnSimpan').textContent = 'Simpan';
   $('btnBatal').style.display = 'none';
+  paparTarikh();
   setTamat(120);
 }
 document.querySelectorAll('[data-minit]').forEach(b => b.onclick = () => setTamat(Number(b.dataset.minit)));
@@ -345,7 +361,7 @@ window.ubah = id => {
   for (const k of ['tarikh', 'tingkatan', 'mula', 'tamat', 'catatan']) $(k).value = x[k];
   $('btnSimpan').textContent = 'Kemas kini';
   $('btnBatal').style.display = 'block';
-  kemasRingkas(); tukarTab('catat');
+  paparTarikh(); kemasRingkas(); tukarTab('catat');
 };
 window.padam = async id => {
   const x = entri.find(e => e.id === id);
