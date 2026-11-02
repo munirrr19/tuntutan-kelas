@@ -11,7 +11,7 @@ Website untuk guru merekod kelas Al-Quran yang diajar setiap hari dan menjana Bo
 1. Buka Google Sheet **Tuntutan Kelas** dan pergi ke tab **Guru**.
 2. Isi satu baris baru dengan **nama**, **kp** dan **telefon** sahaja.
 3. Pilih menu **Tuntutan Kelas → Jana token & link guru**. Lajur `id`, `token` dan `link` akan terisi sendiri.
-4. Hantar **link** itu kepada guru tersebut, contohnya melalui WhatsApp. Link ini adalah peribadi.
+4. Tekan **Hantar** di lajur `whatsapp` (lajur H). WhatsApp akan dibuka ke nombor guru itu bersama link dan cara guna. Semak mesej, kemudian tekan Send. Link ini adalah peribadi, jadi jangan hantar ke group.
 
 ### Jadikan seseorang admin
 Taip `ya` dalam lajur **admin** untuk guru itu. Admin akan nampak tab **Admin** dalam website, yang menunjukkan senarai semua guru serta jumlah jam dan RM, dan membolehkan admin mencetak borang setiap guru atau semua sekali.
