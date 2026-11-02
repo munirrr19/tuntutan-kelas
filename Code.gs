@@ -33,7 +33,8 @@ function setup() {
     const t = {};
     baris_(TETAPAN).forEach(r => t[r[0]] = String(r[1]));
     const id = Utilities.getUuid().slice(0, 8);
-    guru.appendRow([id, t.nama || '', t.kp || '', t.telefon || '', lama, 'ya', '']);
+    // setValues (bukan appendRow) supaya format teks dikekalkan dan sifar di depan tidak hilang
+    guru.getRange(2, 1, 1, 7).setNumberFormat('@').setValues([[id, t.nama || '', t.kp || '', t.telefon || '', lama, 'ya', '']]);
     const n = data.getLastRow() - 1;
     if (n > 0) {
       const r = data.getRange(2, 8, n, 1);
@@ -63,12 +64,17 @@ function baris_(nama) {
   return SpreadsheetApp.getActive().getSheetByName(nama).getDataRange().getValues().slice(1);
 }
 
+// Sheet menukar nombor seperti 0123456789 kepada 123456789 (cth bila tampal dari Excel); pulihkan sifar di depan
+// (nombor Malaysia sentiasa bermula dengan 0; KP tanpa sengkang sentiasa 12 digit)
+const telefon_ = v => /^[1-9][\d -]*$/.test(String(v)) ? '0' + v : String(v);
+const kp_ = v => /^\d{9,11}$/.test(String(v)) ? String(v).padStart(12, '0') : String(v);
+const profil_ = g => ({ id: String(g[0]), nama: String(g[1]), kp: kp_(g[2]), telefon: telefon_(g[3]) });
+
 function cariGuru_(token) {
   const semua = baris_(GURU);
   const i = token ? semua.findIndex(r => String(r[4]) === String(token)) : -1;
   if (i < 0) throw new Error('Token tidak sah');
-  const g = semua[i];
-  return { baris: i + 2, id: String(g[0]), nama: String(g[1]), kp: String(g[2]), telefon: String(g[3]), admin: String(g[5]).trim().toLowerCase() === 'ya' };
+  return { baris: i + 2, ...profil_(semua[i]), admin: String(semua[i][5]).trim().toLowerCase() === 'ya' };
 }
 
 function jawab_(obj) {
@@ -90,7 +96,7 @@ function doGet(e) {
     baris_(TETAPAN).forEach(r => { if (r[0]) t[r[0]] = String(r[1]); });
     const res = { ok: true, guru, kadar: Number(t.kadar) || 30, entri };
     if (guru.admin) {
-      res.semuaGuru = baris_(GURU).filter(r => r[0]).map(r => ({ id: String(r[0]), nama: String(r[1]), kp: String(r[2]), telefon: String(r[3]) }));
+      res.semuaGuru = baris_(GURU).filter(r => r[0]).map(profil_);
     }
     return jawab_(res);
   } catch (err) {
@@ -124,7 +130,7 @@ function doPost(e) {
       }
     } else if (b.action === 'profil') {
       const p = b.profil;
-      ss.getSheetByName(GURU).getRange(guru.baris, 2, 1, 3).setValues([[String(p.nama), String(p.kp), String(p.telefon)]]);
+      ss.getSheetByName(GURU).getRange(guru.baris, 2, 1, 3).setNumberFormat('@').setValues([[String(p.nama), String(p.kp), String(p.telefon)]]);
     } else {
       throw new Error('Tindakan tidak dikenali');
     }
