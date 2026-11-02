@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tuntutan Kelas</title>
+<link rel="icon" href="logo.png">
+<style>
+  :root { --hijau: #0f6b4f; --hijau-muda: #e7f3ee; --kelabu: #6b7280; --garis: #d1d5db; --merah: #b42318; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: #f6f7f8; color: #111827; }
+  header { background: var(--hijau); color: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+  header img { width: 32px; height: 40px; background: #fff; border-radius: 4px; padding: 2px; }
+  header h1 { font-size: 1.05rem; margin: 0; flex: 1; }
+  nav { display: flex; background: #fff; border-bottom: 1px solid var(--garis); position: sticky; top: 0; z-index: 2; }
+  nav button { flex: 1; padding: 12px 4px; border: 0; background: none; font: inherit; font-size: .9rem; color: var(--kelabu); border-bottom: 3px solid transparent; cursor: pointer; }
+  nav button.aktif { color: var(--hijau); border-color: var(--hijau); font-weight: 600; }
+  main { max-width: 640px; margin: 0 auto; padding: 16px; }
+  section { display: none; }
+  section.aktif { display: block; }
+  .kad { background: #fff; border: 1px solid var(--garis); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+  label { display: block; font-size: .85rem; font-weight: 600; margin: 12px 0 4px; }
+  label:first-child { margin-top: 0; }
+  input, select, textarea { width: 100%; padding: 10px; font: inherit; border: 1px solid var(--garis); border-radius: 8px; background: #fff; }
+  .dua { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pantas { display: flex; gap: 8px; margin-top: 8px; }
+  .pantas button { flex: 1; }
+  button.btn { padding: 10px 14px; font: inherit; border-radius: 8px; border: 1px solid var(--hijau); background: #fff; color: var(--hijau); cursor: pointer; }
+  button.utama { background: var(--hijau); color: #fff; width: 100%; margin-top: 16px; padding: 12px; font-weight: 600; }
+  button.bahaya { border-color: var(--merah); color: var(--merah); }
+  button:disabled { opacity: .5; }
+  .ringkas { background: var(--hijau-muda); border-radius: 8px; padding: 10px; margin-top: 12px; text-align: center; font-weight: 600; color: var(--hijau); }
+  .bulan { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+  .bulan input { flex: 1; }
+  .item { display: flex; gap: 10px; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
+  .item:last-child { border-bottom: 0; }
+  .item div { flex: 1; }
+  .item small { color: var(--kelabu); display: block; }
+  .item .btn { padding: 6px 10px; font-size: .85rem; }
+  .jumlah { font-size: 1.1rem; font-weight: 700; text-align: right; }
+  .mesej { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: #111827; color: #fff; padding: 10px 16px; border-radius: 8px; display: none; z-index: 9; max-width: 90vw; }
+  .kosong { color: var(--kelabu); text-align: center; padding: 20px 0; }
+
+  /* Borang: susunan meniru borang kertas, A4 */
+  .pratonton { overflow-x: auto; background: #e5e7eb; padding: 12px; border-radius: 10px; }
+  .halaman { width: 210mm; min-height: 297mm; background: #fff; color: #000; padding: 9mm 14mm; margin: 0 auto 12px; font-family: Arial, Helvetica, sans-serif; font-size: 10.5pt; }
+  .kepala { display: flex; align-items: center; gap: 14px; }
+  .kepala img { width: 18mm; }
+  .kepala .ar { font-size: 11pt; }
+  .kepala b { display: block; }
+  .tajuk { text-align: center; font-size: 15pt; font-weight: 700; margin: 4mm 0; }
+  .medan { display: flex; gap: 6mm; margin: 2.5mm 0; }
+  .medan span { flex: 1; border-bottom: 1px dotted #000; padding-left: 2mm; }
+  .halaman table { width: 100%; border-collapse: collapse; margin-top: 3mm; }
+  .halaman th, .halaman td { border: 1px solid #000; padding: 0 2mm; height: 5.8mm; text-align: center; }
+  .halaman td.catatan { text-align: left; }
+  .halaman p { margin: 3mm 0; }
+  .kotak { border: 1px solid #000; width: 125mm; padding: 2.5mm 4mm; margin-top: 1mm; line-height: 1.6; }
+  .tt { margin-top: 6mm; display: flex; justify-content: space-between; align-items: flex-end; }
+  .tt .ruang { height: 12mm; }
+
+  @media print {
+    @page { size: A4; margin: 0; }
+    body { background: #fff; }
+    header, nav, .tiada-cetak, .mesej { display: none !important; }
+    main { max-width: none; padding: 0; }
+    section { display: none !important; }
+    #tab-borang { display: block !important; }
+    .pratonton { background: none; padding: 0; overflow: visible; }
+    .halaman { margin: 0; page-break-after: always; }
+    .halaman:last-child { page-break-after: auto; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <img src="logo.png" alt="">
+  <h1>Tuntutan Kelas Al-Quran</h1>
+</header>
+<nav>
+  <button data-tab="catat" class="aktif">Catat</button>
+  <button data-tab="senarai">Senarai</button>
+  <button data-tab="borang">Borang</button>
+  <button data-tab="tetapan">Tetapan</button>
+</nav>
+<main>
+  <section id="tab-catat" class="aktif">
+    <form id="fCatat" class="kad">
+      <label for="tarikh">Tarikh</label>
+      <input type="date" id="tarikh" required>
+      <label for="tingkatan">Tingkatan</label>
+      <select id="tingkatan" required></select>
+      <div class="dua">
+        <div><label for="mula">Masa mula</label><select id="mula"></select></div>
+        <div><label for="tamat">Masa tamat</label><select id="tamat"></select></div>
+      </div>
+      <div class="pantas">
+        <button type="button" class="btn" data-minit="120">2 jam</button>
+        <button type="button" class="btn" data-minit="60">1 jam</button>
+        <button type="button" class="btn" data-minit="30">30 minit</button>
+      </div>
+      <div class="ringkas" id="ringkasCatat"></div>
+      <label for="catatan">Catatan (pilihan)</label>
+      <input id="catatan" placeholder="cth: Ganti Ustaz Ali">
+      <button type="submit" class="btn utama" id="btnSimpan">Simpan</button>
+      <button type="button" class="btn" id="btnBatal" style="display:none;width:100%;margin-top:8px">Batal ubah</button>
+    </form>
+  </section>
+
+  <section id="tab-senarai">
+    <div class="bulan"><input type="month" class="pilihBulan" aria-label="Bulan"></div>
+    <div class="kad" id="senarai"></div>
+  </section>
+
+  <section id="tab-borang">
+    <div class="bulan tiada-cetak">
+      <input type="month" class="pilihBulan" aria-label="Bulan">
+      <button class="btn" onclick="print()">Cetak / PDF</button>
+    </div>
+    <div class="pratonton" id="borang"></div>
+  </section>
+
+  <section id="tab-tetapan">
+    <form id="fTetapan" class="kad">
+      <label for="tNama">Nama</label><input id="tNama">
+      <label for="tKp">No Kad Pengenalan</label><input id="tKp" inputmode="numeric">
+      <label for="tTel">No Telefon</label><input id="tTel" inputmode="tel">
+      <label for="tKadar">Kadar sejam (RM)</label><input id="tKadar" type="number" min="0" step="0.5">
+      <hr style="margin:20px 0;border:0;border-top:1px solid #eee">
+      <label for="tUrl">URL Apps Script</label><input id="tUrl" placeholder="https://script.google.com/macros/s/.../exec">
+      <label for="tToken">Token</label><input id="tToken" type="password" autocomplete="off">
+      <button type="submit" class="btn utama">Simpan tetapan</button>
+    </form>
+  </section>
+</main>
+<div class="mesej" id="mesej"></div>
+
+<script>
+const BULAN = ['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','September','Oktober','November','Disember'];
+const TINGKATAN = [1,2,3,4,5,6].flatMap(t => [t + 'A', t + 'B']);
+const BARIS_SEHALAMAN = 20;
+const $ = id => document.getElementById(id);
+
+let entri = [];
+let tetapan = { kadar: '30' };
+let idUbah = null;
+let bulan = new Date().toLocaleDateString('en-CA').slice(0, 7);
+
+const minit = hhmm => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
+const hhmm = min => String(Math.floor(min / 60)).padStart(2, '0') + ':' + String(min % 60).padStart(2, '0');
+const kiraJam = (mula, tamat) => (minit(tamat) - minit(mula)) / 60;
+const rm = n => n.toFixed(2);
+const jamTeks = j => Number.isInteger(j) ? String(j) : j.toFixed(1);
+function masaTeks(t) {
+  const min = minit(t), h = Math.floor(min / 60), h12 = h % 12 || 12;
+  const sufiks = h < 12 ? 'pg' : h < 19 ? 'ptg' : 'mlm';
+  return h12 + '.' + String(min % 60).padStart(2, '0') + ' ' + sufiks;
+}
+const tarikhTeks = t => t.split('-').reverse().join('/');
+const kadar = () => Number(tetapan.kadar) || 30;
+// Pecah kepada halaman 20 baris; sekurang-kurangnya satu halaman kosong
+const pecah = (arr, n) => arr.length ? Array.from({ length: Math.ceil(arr.length / n) }, (_, i) => arr.slice(i * n, i * n + n)) : [[]];
+
+console.assert(kiraJam('08:00', '10:00') === 2 && kiraJam('14:00', '14:30') === 0.5, 'kiraJam');
+console.assert(masaTeks('08:00') === '8.00 pg' && masaTeks('12:30') === '12.30 ptg' && masaTeks('20:00') === '8.00 mlm', 'masaTeks');
+console.assert(pecah([1,2,3], 2).length === 2 && pecah([], 20).length === 1, 'pecah');
+
+function mesej(teks) {
+  const m = $('mesej'); m.textContent = teks; m.style.display = 'block';
+  clearTimeout(mesej.t); mesej.t = setTimeout(() => m.style.display = 'none', 2500);
+}
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// ---- API (Google Apps Script) ----
+const sambungan = () => ({ url: localStorage.getItem('url') || '', token: localStorage.getItem('token') || '' });
+async function api(body) {
+  const { url, token } = sambungan();
+  if (!url || !token) throw new Error('Sila isi URL dan Token di Tetapan');
+  const res = body
+    ? await fetch(url, { method: 'POST', body: JSON.stringify({ ...body, token }) }) // text/plain: elak preflight CORS
+    : await fetch(url + '?token=' + encodeURIComponent(token));
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.ralat || 'Ralat pelayan');
+  return data;
+}
+async function muat() {
+  try {
+    const d = await api();
+    entri = d.entri;
+    tetapan = { kadar: '30', ...d.tetapan };
+    isiTetapan(); lukis();
+  } catch (e) { mesej(e.message); if (!sambungan().url) tukarTab('tetapan'); }
+}
+
+// ---- Tab ----
+function tukarTab(nama) {
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('aktif', b.dataset.tab === nama));
+  document.querySelectorAll('section').forEach(s => s.classList.toggle('aktif', s.id === 'tab-' + nama));
+}
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => tukarTab(b.dataset.tab));
+
+// ---- Catat ----
+const PILIHAN_MASA = Array.from({ length: (23 * 60 - 6 * 60) / 30 + 1 }, (_, i) => hhmm(6 * 60 + i * 30));
+$('tingkatan').innerHTML = TINGKATAN.map(t => `<option>${t}</option>`).join('');
+for (const id of ['mula', 'tamat']) $(id).innerHTML = PILIHAN_MASA.map(t => `<option value="${t}">${masaTeks(t)}</option>`).join('');
+
+function setTamat(minitTambah) {
+  const t = Math.min(minit($('mula').value) + minitTambah, 23 * 60);
+  $('tamat').value = hhmm(t);
+  kemasRingkas();
+}
+function kemasRingkas() {
+  const j = kiraJam($('mula').value, $('tamat').value);
+  $('ringkasCatat').textContent = j > 0 ? `${jamTeks(j)} jam × RM${kadar()} = RM${rm(j * kadar())}` : 'Masa tamat mesti selepas masa mula';
+  $('btnSimpan').disabled = !(j > 0);
+}
+function resetCatat() {
+  idUbah = null;
+  $('tarikh').value = new Date().toLocaleDateString('en-CA'); // yyyy-mm-dd ikut zon waktu tempatan
+  $('tingkatan').value = localStorage.getItem('tingkatanAkhir') || TINGKATAN[0];
+  $('mula').value = localStorage.getItem('mulaAkhir') || '08:00';
+  $('catatan').value = '';
+  $('btnSimpan').textContent = 'Simpan';
+  $('btnBatal').style.display = 'none';
+  setTamat(120);
+}
+document.querySelectorAll('[data-minit]').forEach(b => b.onclick = () => setTamat(Number(b.dataset.minit)));
+$('mula').onchange = () => setTamat(minit($('tamat').value) > minit($('mula').value) ? minit($('tamat').value) - minit($('mula').value) : 120);
+$('tamat').onchange = kemasRingkas;
+$('btnBatal').onclick = resetCatat;
+
+$('fCatat').onsubmit = async e => {
+  e.preventDefault();
+  const r = {
+    id: idUbah || crypto.randomUUID(),
+    tarikh: $('tarikh').value,
+    tingkatan: $('tingkatan').value,
+    mula: $('mula').value,
+    tamat: $('tamat').value,
+    catatan: $('catatan').value.trim(),
+  };
+  r.jam = kiraJam(r.mula, r.tamat);
+  $('btnSimpan').disabled = true;
+  try {
+    await api({ action: 'simpan', entri: r });
+    entri = entri.filter(x => x.id !== r.id).concat(r);
+    localStorage.setItem('tingkatanAkhir', r.tingkatan);
+    localStorage.setItem('mulaAkhir', r.mula);
+    mesej(idUbah ? 'Dikemas kini' : 'Disimpan');
+    bulan = r.tarikh.slice(0, 7);
+    resetCatat(); lukis();
+  } catch (err) { mesej(err.message); }
+  kemasRingkas();
+};
+
+// ---- Senarai & Borang ----
+const entriBulan = () => entri.filter(x => x.tarikh.startsWith(bulan)).sort((a, b) => (a.tarikh + a.mula).localeCompare(b.tarikh + b.mula));
+
+function lukis() {
+  document.querySelectorAll('.pilihBulan').forEach(i => i.value = bulan);
+  const senarai = entriBulan();
+  const jumlahJam = senarai.reduce((s, x) => s + x.jam, 0);
+
+  $('senarai').innerHTML = senarai.length
+    ? senarai.map(x => `<div class="item"><div><b>${tarikhTeks(x.tarikh)} · ${esc(x.tingkatan)}</b>
+        <small>${masaTeks(x.mula)} – ${masaTeks(x.tamat)} · ${jamTeks(x.jam)} jam${x.catatan ? ' · ' + esc(x.catatan) : ''}</small></div>
+        <button class="btn" onclick="ubah('${x.id}')">Ubah</button>
+        <button class="btn bahaya" onclick="padam('${x.id}')">Padam</button></div>`).join('')
+      + `<div class="jumlah">${jamTeks(jumlahJam)} jam × RM${kadar()} = RM${rm(jumlahJam * kadar())}</div>`
+    : '<div class="kosong">Tiada rekod untuk bulan ini</div>';
+
+  const [thn, bln] = bulan.split('-');
+  const halaman = pecah(senarai, BARIS_SEHALAMAN);
+  $('borang').innerHTML = halaman.map((h, hi) => `<div class="halaman">
+    <div class="kepala"><img src="logo.png" alt=""><div>
+      <div class="ar">معهد تحفيظ القرءان والقراءات</div>
+      <b>MAAHAD TAHFIZ AL QURAN WAL QIRAAT</b><b>16600 PULAI CHONDONG</b></div></div>
+    <div class="tajuk">BORANG TUNTUTAN MENGAJAR KELAS AL-QURAN</div>
+    <div class="medan" style="justify-content:flex-end"><b>BULAN :</b><span style="flex:0 0 35mm">${BULAN[bln - 1].toUpperCase()}</span><b>TAHUN :</b><span style="flex:0 0 25mm">${thn}</span></div>
+    <div class="medan"><b>NAMA :</b><span>${esc(tetapan.nama)}</span></div>
+    <div class="medan"><b>NO KAD PENGENALAN :</b><span>${esc(tetapan.kp)}</span><b>NO TELEFON :</b><span>${esc(tetapan.telefon)}</span></div>
+    <p>Dengan ini, saya menuntut bayaran mengajar kelas Al Quran di Maahad Tahfiz Al Quran Wal Qiraat sebagaimana kenyataan berikut:</p>
+    <table><thead><tr><th style="width:9%">BIL</th><th style="width:14%">TARIKH</th><th style="width:13%">TINGKATAN</th><th style="width:26%">MASA</th><th style="width:13%">JUMLAH JAM</th><th>CATATAN</th></tr></thead>
+    <tbody>${Array.from({ length: BARIS_SEHALAMAN }, (_, i) => {
+      const x = h[i], bil = hi * BARIS_SEHALAMAN + i + 1;
+      return x ? `<tr><td>${bil}</td><td>${tarikhTeks(x.tarikh)}</td><td>${esc(x.tingkatan)}</td><td>${masaTeks(x.mula)} – ${masaTeks(x.tamat)}</td><td>${jamTeks(x.jam)}</td><td class="catatan">${esc(x.catatan)}</td></tr>`
+               : `<tr><td>${bil}</td><td></td><td></td><td></td><td></td><td></td></tr>`;
+    }).join('')}</tbody></table>
+    ${hi < halaman.length - 1 ? '<p style="text-align:right"><i>bersambung...</i></p>' : `
+    <p style="margin:5mm 0 0"><b>JUMLAH JAM MENGAJAR</b></p>
+    <div class="kotak">JUMLAH KESELURUHAN JAM MENGAJAR <b>${jamTeks(jumlahJam)}</b> JAM X RM${kadar()}<br>
+      <b style="font-size:12pt">JUMLAH KESELURUHAN, RM : ${rm(jumlahJam * kadar())}</b></div>
+    <div class="tt">
+      <div>Nama dan tandatangan guru<div class="ruang"></div>( ${esc(tetapan.nama) || '&nbsp;'.repeat(60)} )</div>
+      <div>Disemak oleh :<div class="ruang"></div>(......................................................)<br>Setiausaha Al - Quran<br>Maahad Tahfiz Al Quran Wal Qiraat</div></div>
+    <div style="text-align:right;margin-top:5mm">Tarikh : ..............................</div>`}
+  </div>`).join('');
+}
+
+window.ubah = id => {
+  const x = entri.find(e => e.id === id);
+  idUbah = id;
+  for (const k of ['tarikh', 'tingkatan', 'mula', 'tamat', 'catatan']) $(k).value = x[k];
+  $('btnSimpan').textContent = 'Kemas kini';
+  $('btnBatal').style.display = 'block';
+  kemasRingkas(); tukarTab('catat');
+};
+window.padam = async id => {
+  const x = entri.find(e => e.id === id);
+  if (!confirm(`Padam rekod ${tarikhTeks(x.tarikh)} ${x.tingkatan}?`)) return;
+  try {
+    await api({ action: 'padam', entri: { id } });
+    entri = entri.filter(e => e.id !== id);
+    lukis(); mesej('Dipadam');
+  } catch (err) { mesej(err.message); }
+};
+document.querySelectorAll('.pilihBulan').forEach(i => i.onchange = () => { if (i.value) { bulan = i.value; lukis(); } });
+
+// ---- Tetapan ----
+function isiTetapan() {
+  $('tNama').value = tetapan.nama || '';
+  $('tKp').value = tetapan.kp || '';
+  $('tTel').value = tetapan.telefon || '';
+  $('tKadar').value = tetapan.kadar || '30';
+  $('tUrl').value = sambungan().url;
+  $('tToken').value = sambungan().token;
+}
+$('fTetapan').onsubmit = async e => {
+  e.preventDefault();
+  localStorage.setItem('url', $('tUrl').value.trim());
+  localStorage.setItem('token', $('tToken').value.trim());
+  const baru = { nama: $('tNama').value.trim(), kp: $('tKp').value.trim(), telefon: $('tTel').value.trim(), kadar: $('tKadar').value || '30' };
+  try {
+    await api({ action: 'tetapan', tetapan: baru });
+    tetapan = baru; mesej('Tetapan disimpan');
+    await muat(); kemasRingkas();
+  } catch (err) { mesej(err.message); }
+};
+
+resetCatat(); isiTetapan(); lukis(); muat();
+</script>
+</body>
+</html>
