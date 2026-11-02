@@ -150,7 +150,7 @@ const minit = hhmm => { const [h, m] = hhmm.split(':').map(Number); return h * 6
 const hhmm = min => String(Math.floor(min / 60)).padStart(2, '0') + ':' + String(min % 60).padStart(2, '0');
 const kiraJam = (mula, tamat) => (minit(tamat) - minit(mula)) / 60;
 const rm = n => n.toFixed(2);
-const jamTeks = j => Number.isInteger(j) ? String(j) : j.toFixed(1);
+const jamTeks = j => String(+j.toFixed(2)); // 0.75, 1.25, 2
 function masaTeks(t) {
   const min = minit(t), h = Math.floor(min / 60), h12 = h % 12 || 12;
   const sufiks = h < 12 ? 'pg' : h < 19 ? 'ptg' : 'mlm';
@@ -163,6 +163,7 @@ const pecah = (arr, n) => arr.length ? Array.from({ length: Math.ceil(arr.length
 
 console.assert(kiraJam('08:00', '10:00') === 2 && kiraJam('14:00', '14:30') === 0.5, 'kiraJam');
 console.assert(masaTeks('08:00') === '8.00 pg' && masaTeks('12:30') === '12.30 ptg' && masaTeks('20:00') === '8.00 mlm', 'masaTeks');
+console.assert(kiraJam('08:15', '10:15') === 2 && jamTeks(kiraJam('08:00', '08:45')) === '0.75', 'suku jam');
 console.assert(pecah([1,2,3], 2).length === 2 && pecah([], 20).length === 1, 'pecah');
 
 function mesej(teks) {
@@ -200,7 +201,7 @@ function tukarTab(nama) {
 document.querySelectorAll('nav button').forEach(b => b.onclick = () => tukarTab(b.dataset.tab));
 
 // ---- Catat ----
-const PILIHAN_MASA = Array.from({ length: (23 * 60 - 6 * 60) / 30 + 1 }, (_, i) => hhmm(6 * 60 + i * 30));
+const PILIHAN_MASA = Array.from({ length: (23 * 60 - 6 * 60) / 15 + 1 }, (_, i) => hhmm(6 * 60 + i * 15));
 $('tingkatan').innerHTML = TINGKATAN.map(t => `<option>${t}</option>`).join('');
 for (const id of ['mula', 'tamat']) $(id).innerHTML = PILIHAN_MASA.map(t => `<option value="${t}">${masaTeks(t)}</option>`).join('');
 
@@ -225,7 +226,10 @@ function resetCatat() {
   setTamat(120);
 }
 document.querySelectorAll('[data-minit]').forEach(b => b.onclick = () => setTamat(Number(b.dataset.minit)));
-$('mula').onchange = () => setTamat(minit($('tamat').value) > minit($('mula').value) ? minit($('tamat').value) - minit($('mula').value) : 120);
+// Tukar masa mula: kekalkan tempoh kelas sebelum ini
+let tempoh = 120;
+$('mula').onfocus = () => { tempoh = Math.max(minit($('tamat').value) - minit($('mula').value), 15); };
+$('mula').onchange = () => setTamat(tempoh);
 $('tamat').onchange = kemasRingkas;
 $('btnBatal').onclick = resetCatat;
 
