@@ -197,8 +197,9 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '
 // Link peribadi guru: .../#k=TOKEN. Token dibiarkan dalam URL supaya "Add to Home Screen" di iPhone
 // (storan berasingan daripada Safari) masih membawa token.
 const kunci = new URLSearchParams(location.hash.slice(1)).get('k');
-if (kunci) localStorage.setItem('token', kunci);
 const token = () => localStorage.getItem('token') || '';
+// Elak admin tertukar akaun tanpa sedar bila buka link guru lain
+if (kunci && kunci !== token() && (!token() || confirm('Tukar ke akaun lain?'))) localStorage.setItem('token', kunci);
 
 async function api(body) {
   if (!token()) throw new Error('Sila buka link peribadi anda daripada admin');
