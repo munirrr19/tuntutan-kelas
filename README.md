@@ -25,6 +25,9 @@ Admin yang juga perlu menambah guru (contohnya Setiausaha) mesti diberi akses **
 ### Tukar kadar sejam
 Dalam tab **Tetapan**, tambah baris `kadar` dengan nilai `30` (atau kadar baru). Jika tiada baris ini, kadar asal ialah RM30.
 
+### Kelas intensif (cuti panjang)
+Dalam tab **Tetapan**, tambah baris `intensif` dengan bilangan kelas, contohnya `7`. Pilihan **Kelas 1** hingga **Kelas 7** akan muncul dalam dropdown Tingkatan guru. Untuk menutup musim intensif, kosongkan atau padam baris itu. Rekod kelas intensif yang lama tidak terjejas.
+
 ## Untuk guru
 1. Buka link peribadi daripada admin. Anda hanya perlu buat ini sekali di setiap telefon.
 2. Di tab **Tetapan**, semak Nama, No KP dan No Telefon.

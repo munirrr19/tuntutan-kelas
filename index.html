@@ -225,6 +225,10 @@ async function muat() {
     // Rekod yang belum sampai ke Sheet kekal dipaparkan
     entri = d.entri.filter(x => !gilir().some(q => q.id === x.id)).concat(gilir().map(q => ({ ...q, guru: guru.id })));
     kadarSejam = d.kadar;
+    const t = $('tingkatan').value;
+    isiTingkatan(d.intensif);
+    $('tingkatan').value = idUbah ? t : localStorage.getItem('tingkatanAkhir') || t;
+    if (!$('tingkatan').value) $('tingkatan').value = TINGKATAN[0];
     semuaGuru = d.semuaGuru || [];
     selesai = d.selesai || [];
     $('navAdmin').hidden = !guru.admin;
@@ -269,7 +273,12 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => tukarTab(
 
 // ---- Catat ----
 const PILIHAN_MASA = Array.from({ length: (23 * 60 - 6 * 60) / 15 + 1 }, (_, i) => hhmm(6 * 60 + i * 15));
-$('tingkatan').innerHTML = TINGKATAN.map(t => `<option>${t}</option>`).join('');
+// Kelas intensif (Kelas 1..n) hanya muncul bila admin isi `intensif` di tab Tetapan Sheet
+function isiTingkatan(intensif) {
+  $('tingkatan').innerHTML = TINGKATAN.map(t => `<option>${t}</option>`).join('')
+    + (intensif ? `<optgroup label="Kelas Intensif">${Array.from({ length: intensif }, (_, i) => `<option>Kelas ${i + 1}</option>`).join('')}</optgroup>` : '');
+}
+isiTingkatan(0);
 for (const id of ['mula', 'tamat']) $(id).innerHTML = PILIHAN_MASA.map(t => `<option value="${t}">${masaTeks(t)}</option>`).join('');
 
 const HARI = ['Ahad', 'Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu'];
@@ -294,6 +303,7 @@ function resetCatat() {
   idUbah = null;
   $('tarikh').value = new Date().toLocaleDateString('en-CA'); // yyyy-mm-dd ikut zon waktu tempatan
   $('tingkatan').value = localStorage.getItem('tingkatanAkhir') || TINGKATAN[0];
+  if (!$('tingkatan').value) $('tingkatan').value = TINGKATAN[0]; // kelas intensif yang sudah ditutup
   $('mula').value = localStorage.getItem('mulaAkhir') || '08:00';
   $('catatan').value = '';
   $('btnSimpan').textContent = 'Simpan';
@@ -448,6 +458,8 @@ function borangHTML(profil, senarai) {
 window.ubah = id => {
   const x = entri.find(e => e.id === id);
   idUbah = id;
+  // Rekod kelas intensif lama masih boleh diubah walaupun musim intensif sudah ditutup
+  if (![...$('tingkatan').options].some(o => o.value === x.tingkatan)) $('tingkatan').add(new Option(x.tingkatan));
   for (const k of ['tarikh', 'tingkatan', 'mula', 'tamat', 'catatan']) $(k).value = x[k];
   $('btnSimpan').textContent = 'Kemas kini';
   $('btnBatal').style.display = 'block';

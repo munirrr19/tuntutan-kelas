@@ -109,7 +109,8 @@ function doGet(e) {
     const selesai = helaiSelesai_().getDataRange().getValues().slice(1)
       .filter(r => r[0] && (guru.admin || String(r[0]) === guru.id))
       .map(r => ({ guru: String(r[0]), bulan: String(r[1]), masa: String(r[2]) }));
-    const res = { ok: true, guru, kadar: Number(t.kadar) || 30, entri, selesai };
+    // intensif: bilangan "Kelas 1..n" untuk musim cuti; kosongkan bila tamat
+    const res = { ok: true, guru, kadar: Number(t.kadar) || 30, intensif: Number(t.intensif) || 0, entri, selesai };
     if (guru.admin) {
       res.semuaGuru = baris_(GURU).filter(r => r[0]).map(profil_);
     }
