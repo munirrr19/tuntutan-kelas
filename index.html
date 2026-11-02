@@ -3,14 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tuntutan Kelas</title>
-<link rel="icon" href="logo.png">
+<title>Sistem Tuntutan Mengajar Al-Quran</title>
+<link rel="icon" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f6b4f">
+<meta name="apple-mobile-web-app-title" content="Tuntutan Al-Quran">
 <style>
   :root { --hijau: #0f6b4f; --hijau-muda: #e7f3ee; --kelabu: #6b7280; --garis: #d1d5db; --merah: #b42318; }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: #f6f7f8; color: #111827; }
   header { background: var(--hijau); color: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
-  header img { width: 32px; height: 40px; background: #fff; border-radius: 4px; padding: 2px; }
+  header img { height: 44px; width: auto; }
   header h1 { font-size: 1.05rem; margin: 0; flex: 1; }
   nav { display: flex; background: #fff; border-bottom: 1px solid var(--garis); position: sticky; top: 0; z-index: 2; }
   nav button { flex: 1; padding: 12px 4px; border: 0; background: none; font: inherit; font-size: .9rem; color: var(--kelabu); border-bottom: 3px solid transparent; cursor: pointer; }
@@ -77,8 +81,8 @@
 </head>
 <body>
 <header>
-  <img src="logo.png" alt="">
-  <h1>Tuntutan Kelas Al-Quran</h1>
+  <img src="logo-warna.png" alt="">
+  <h1>SISTEM TUNTUTAN MENGAJAR <span style="white-space:nowrap">AL-QURAN</span></h1>
 </header>
 <nav>
   <button data-tab="catat" class="aktif">Catat</button>
@@ -190,9 +194,10 @@ function mesej(teks) {
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 // ---- API (Google Apps Script) ----
-// Link peribadi guru: .../#k=TOKEN. Simpan token, kemudian buang dari bar alamat.
+// Link peribadi guru: .../#k=TOKEN. Token dibiarkan dalam URL supaya "Add to Home Screen" di iPhone
+// (storan berasingan daripada Safari) masih membawa token.
 const kunci = new URLSearchParams(location.hash.slice(1)).get('k');
-if (kunci) { localStorage.setItem('token', kunci); history.replaceState(null, '', location.pathname); }
+if (kunci) localStorage.setItem('token', kunci);
 const token = () => localStorage.getItem('token') || '';
 
 async function api(body) {
