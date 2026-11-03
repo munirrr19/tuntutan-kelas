@@ -476,7 +476,7 @@ window.suratClaim = async () => {
     const s = helai('Surat', [4, 12, 12, 12, 14, 34]);
     ['Panitia Al-Quran,', 'Maahad Tahfiz Al-Quran Wal Qiraat,', '16600 Pulai Chondong,', 'Kelantan.'].forEach((t, i) => tulis(s, 'A' + (i + 1), t));
     for (const k of 'ABCDEF') s.getCell(k + '5').border = { bottom: { style: 'thin' } };
-    tulis(s, 'A7', 'Ke majlis,'); tulis(s, 'F7', `Ruj. Kami: 700-1/${String(kini.getFullYear()).slice(2)} (   )`);
+    tulis(s, 'A7', 'Ke majlis,'); tulis(s, 'F7', 'Ruj. Kami: 700-1/26 (   )');
     tulis(s, 'F8', 'Tarikh: ' + tarikhHijri(kini));
     tulis(s, 'A9', 'YBrs Pengetua,'); tulis(s, 'F9', `Bersamaan: ${kini.getDate()} ${BULAN[kini.getMonth()]} ${kini.getFullYear()}`);
     ['Maahad Tahfiz Al-Quran Wal Qiraat,', '16600 Pulai Chondong,', 'Kelantan.'].forEach((t, i) => tulis(s, 'A' + (10 + i), t));
