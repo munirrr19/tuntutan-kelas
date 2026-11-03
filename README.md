@@ -36,7 +36,9 @@ Dalam tab **Tetapan**, tambah baris `intensif` dengan bilangan kelas, contohnya 
 
 Di tab **Admin**, setiap guru ditunjuk sebagai ✓ Selesai atau Belum selesai. Guru yang belum selesai berada di atas. Status ini disimpan dalam helaian `Selesai` di Sheet.
 
-Untuk bendahari, gunakan **Ringkasan bayaran** untuk mencetak satu halaman senarai nama, No KP, jam dan RM semua guru. Gunakan pula **Muat turun Excel** untuk mendapatkan fail yang sama dalam bentuk Excel.
+Untuk urusan claim:
+- **Senarai penerima imbuhan** mencetak satu halaman senarai nama, No KP, jam dan RM semua guru.
+- **Surat claim (PDF)** mencetak surat permohonan kepada Pengetua bersama lampiran senarai penerima. Dalam tetingkap cetak, pilih **Save as PDF** untuk mendapatkan fail PDF.
 
 Di telefon, pilih **Add to Home screen** supaya website ini boleh dibuka seperti app.
 

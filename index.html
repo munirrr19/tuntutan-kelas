@@ -66,6 +66,17 @@
   .kotak { border: 1px solid #000; width: 125mm; padding: 2.5mm 4mm; margin-top: 1mm; line-height: 1.6; }
   .tt { margin-top: 6mm; display: flex; justify-content: space-between; align-items: flex-end; }
   .tt .ruang { height: 12mm; }
+  /* Surat claim: ikut contoh Panitia Al-Quran (Times, 12pt) */
+  .surat { font-family: "Times New Roman", Times, serif; font-size: 12pt; line-height: 1.3; padding: 22mm 20mm 20mm 23mm; }
+  .surat p { margin: 0 0 5mm; }
+  .surat hr { border: 0; border-top: 1px solid #000; margin: -1mm 0 6mm; }
+  .surat .alamat { display: flex; justify-content: space-between; }
+  .surat .alamat p:last-child { width: 62mm; }
+  .surat ol { padding-left: 6mm; margin: 0 0 5mm; }
+  .surat li { padding-left: 0; margin-bottom: 6mm; }
+  .halaman table.penerima { border: 2px solid #000; margin: 8mm 0 4mm; }
+  .penerima td, .penerima th { height: 6.3mm; white-space: nowrap; }
+  .kekerapan { display: flex; justify-content: space-between; }
 
   @media print {
     @page { size: A4; margin: 0; }
@@ -149,8 +160,7 @@
     </div>
     <div class="pantas tiada-cetak" style="margin:0 0 12px">
       <button class="btn" onclick="cetakRingkasan()">Senarai penerima imbuhan</button>
-      <button class="btn" onclick="suratClaim()">Surat claim (Excel)</button>
-      <button class="btn" onclick="muatTurunExcel()">Muat turun Excel</button>
+      <button class="btn" onclick="suratClaim()">Surat claim (PDF)</button>
     </div>
     <div class="kad tiada-cetak" id="ringkasAdmin"></div>
     <div class="pratonton" id="borangAdmin"></div>
@@ -425,21 +435,9 @@ function ringkasanHTML() {
 }
 window.cetakRingkasan = () => { $('borangAdmin').innerHTML = ringkasanHTML(); print(); lukisAdmin(); };
 
-window.muatTurunExcel = () => {
-  const teks = v => /^[=+\-@]/.test(v) ? "'" + v : v; // elak Excel baca nama sebagai formula
-  const baris = [['Bil', 'Nama', 'No KP', 'No Telefon', 'Jam', 'Jumlah (RM)', 'Status']].concat(senaraiBayaran().map(({ g, senarai }, i) =>
-    [i + 1, teks(g.nama), `="${g.kp}"`, `="${g.telefon}"`, jamTeks(jumlah(senarai)), rm(jumlah(senarai) * kadar()), statusSelesai(g.id) ? 'Selesai' : 'Belum selesai']));
-  // BOM supaya Excel baca UTF-8; ="..." supaya sifar di depan KP/telefon kekal
-  const csv = '﻿' + baris.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\r\n');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-  a.download = `tuntutan-${bulan}.csv`;
-  a.click();
-};
-
-// ---- Surat claim (Excel): muka 1 surat, muka 2 senarai penerima, ikut contoh Panitia Al-Quran ----
+// ---- Surat claim (PDF melalui cetak): muka 1 surat, muka 2 senarai penerima, ikut contoh Panitia Al-Quran ----
 const BULAN_HIJRI = ['Muharam', 'Safar', 'Rabiulawal', 'Rabiulakhir', 'Jamadilawal', 'Jamadilakhir', 'Rejab', 'Syaaban', 'Ramadan', 'Syawal', 'Zulkaedah', 'Zulhijah'];
-// shortcut: kalendar Malaysia (JAKIM) dianggar sebagai Umm al-Qura tolak sehari (tepat untuk 2026); admin boleh betulkan dalam Excel
+// shortcut: kalendar Malaysia (JAKIM) dianggar sebagai Umm al-Qura tolak sehari (tepat untuk 2026); semak sebelum cetak
 function tarikhHijri(d) {
   const semalam = new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1);
   const p = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { day: 'numeric', month: 'numeric', year: 'numeric' }).formatToParts(semalam);
@@ -451,98 +449,48 @@ console.assert(tarikhHijri(new Date(2026, 9, 5)) === '23 Rabiulakhir 1448H', 'ta
 const namaSurat = n => String(n).toLowerCase().replace(/[^\s-]+/g, w => /^(bin|binti|bt)$/.test(w) ? w : w[0].toUpperCase() + w.slice(1));
 console.assert(namaSurat('MAGED AHMED ALI AL-QAIFI') === 'Maged Ahmed Ali Al-Qaifi' && namaSurat('AHMAD MUNIR BIN RAHMAN') === 'Ahmad Munir bin Rahman', 'namaSurat');
 
-window.suratClaim = async () => {
-  const ada = senaraiBayaran();
-  if (!ada.length) return mesej('Tiada rekod untuk bulan ini');
-  mesej('Menyediakan surat...');
-  try {
-    if (!window.ExcelJS) await new Promise((ok, gagal) => document.head.appendChild(Object.assign(document.createElement('script'),
-      { src: 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js', onload: ok, onerror: () => gagal(new Error('Gagal memuat ExcelJS. Semak internet.')) })));
-    const kini = new Date(), bln = namaBulan().toUpperCase();
-    const jumlahRM = ada.reduce((s, x) => s + jumlah(x.senarai), 0) * kadar();
-    const font = { name: 'Times New Roman', size: 12 };
-    const wb = new ExcelJS.Workbook();
-    const helai = (nama, lebar) => {
-      const ws = wb.addWorksheet(nama, { views: [{ showGridLines: false }],
-        pageSetup: { paperSize: 9, orientation: 'portrait', fitToPage: true, fitToWidth: 1, fitToHeight: 0,
-          margins: { left: 0.9, right: 0.7, top: 0.8, bottom: 0.8, header: 0.3, footer: 0.3 } } });
-      ws.columns = lebar.map(width => ({ width, style: { font } }));
-      return ws;
-    };
-    const tulis = (ws, alamat, nilai, gaya = {}) => { const c = ws.getCell(alamat); c.value = nilai; c.font = { ...font, ...gaya.font }; if (gaya.alignment) c.alignment = gaya.alignment; return c; };
-    const balut = { vertical: 'top', wrapText: true };
-
-    // Muka 1: surat
-    const s = helai('Surat', [4, 12, 12, 12, 14, 34]);
-    ['Panitia Al-Quran,', 'Maahad Tahfiz Al-Quran Wal Qiraat,', '16600 Pulai Chondong,', 'Kelantan.'].forEach((t, i) => tulis(s, 'A' + (i + 1), t));
-    for (const k of 'ABCDEF') s.getCell(k + '5').border = { bottom: { style: 'thin' } };
-    tulis(s, 'A7', 'Ke majlis,'); tulis(s, 'F7', 'Ruj. Kami: 700-1/26 (   )');
-    tulis(s, 'F8', 'Tarikh: ' + tarikhHijri(kini));
-    tulis(s, 'A9', 'YBrs Pengetua,'); tulis(s, 'F9', `Bersamaan: ${kini.getDate()} ${BULAN[kini.getMonth()]} ${kini.getFullYear()}`);
-    ['Maahad Tahfiz Al-Quran Wal Qiraat,', '16600 Pulai Chondong,', 'Kelantan.'].forEach((t, i) => tulis(s, 'A' + (10 + i), t));
-    tulis(s, 'A14', 'Tuan,');
-    s.mergeCells('A17:F17'); s.getRow(17).height = 32;
-    tulis(s, 'A17', `POHON PERUNTUKAN BAYARAN IMBUHAN KELAS AL-QURAN MALAM DAN HUJUNG MINGGU BAGI BULAN ${bln}`, { font: { bold: true }, alignment: balut });
-    tulis(s, 'A19', 'Dengan segala hormatnya perkara di atas adalah dirujuk.');
-    const para = (baris, no, nilai, tinggi) => {
-      tulis(s, 'A' + baris, no, { alignment: { vertical: 'top' } });
-      s.mergeCells(`B${baris}:F${baris}`); s.getRow(baris).height = tinggi;
-      tulis(s, 'B' + baris, nilai, { alignment: balut });
-    };
-    para(21, '2.', 'Untuk makluman pihak tuan bahawa Unit Al-Quran dan Tahfiz MTAQWQ telah menyusun jadual bertugas bagi setiap guru Al-Quran untuk memantau kelas Al-Quran bagi meningkatkan prestasi hafalan Al-Quran di kalangan pelajar.', 48);
-    para(23, '3.', { richText: [{ font, text: 'Sehubungan dengan itu kami memohon peruntukan kewangan sebanyak ' }, { font: { ...font, bold: true }, text: 'RM' + rm(jumlahRM) },
-      { font, text: ' sebagai bayaran imbuhan kepada guru-guru yang bertugas kelas Al-Quran sebagaimana senarai dan jadual yang dilampirkan.' }] }, 48);
-    para(25, '4.', 'Semoga permohonan ini mendapat perhatian dan pertimbangan daripada pihak tuan dan seterusnya saya dahului dengan ucapan ribuan terima kasih.', 32);
-    tulis(s, 'A27', 'Sekian, terima kasih.');
-    tulis(s, 'A29', '“RAJA DAN RAKYAT, BERPISAH TIADA”', { font: { bold: true, italic: true } });
-    tulis(s, 'A31', '“SEMOGA ALLAH MELINDUNGI TUANKU DUNIA DAN AKHIRAT”', { font: { bold: true, italic: true } });
-    tulis(s, 'A33', 'Saya Yang Menjalankan Amanah,');
-    tulis(s, 'A37', '(NORRUZAIMI BIN RUSMAN)', { font: { bold: true } });
-    tulis(s, 'A38', 'Penolong Kanan Al-Quran,');
-    tulis(s, 'A39', 'Maahad Tahfiz Al-Quran Wal Qiraat');
-    s.pageSetup.fitToHeight = 1;
-
-    // Muka 2: senarai penerima imbuhan
-    const l = helai('Senarai Penerima', [5, 42, 11, 6, 10, 17]);
-    ['SENARAI PENERIMA IMBUHAN', 'KELAS AL-QURAN MALAM & HUJUNG MINGGU', 'BULAN ' + bln].forEach((t, i) => {
-      l.mergeCells(`A${i + 1}:F${i + 1}`);
-      tulis(l, 'A' + (i + 1), t, { font: { bold: true, size: 14 }, alignment: { horizontal: 'center' } });
-    });
-    const nipis = { style: 'thin' }, tebal = { style: 'medium' }, tengah = { horizontal: 'center', vertical: 'middle' };
-    const H = 5;
-    l.mergeCells(`C${H}:E${H}`);
-    [['A', 'BIL'], ['B', 'NAMA'], ['C', 'KEKERAPAN'], ['F', 'JUMLAH (RM)']].forEach(([k, t]) => tulis(l, k + H, t, { font: { bold: true }, alignment: tengah }));
-    const bilBaris = Math.max(23, ada.length);
-    for (let i = 0; i < bilBaris; i++) {
-      const b = H + 1 + i, x = ada[i], j = x && jumlah(x.senarai);
-      tulis(l, 'A' + b, i + 1, { alignment: tengah });
-      if (x) {
-        tulis(l, 'B' + b, namaSurat(x.g.nama));
-        tulis(l, 'C' + b, jamTeks(j) + ' Jam');
-        tulis(l, 'D' + b, 'x', { alignment: { horizontal: 'center' } });
-        tulis(l, 'E' + b, 'RM' + kadar(), { alignment: { horizontal: 'center' } });
-        tulis(l, 'F' + b, j * kadar(), { alignment: { horizontal: 'center' } }).numFmt = '#,##0.00';
-      }
-    }
-    const J = H + 1 + bilBaris;
-    l.mergeCells(`A${J}:E${J}`);
-    tulis(l, 'A' + J, 'Jumlah', { font: { bold: true }, alignment: tengah });
-    tulis(l, 'F' + J, jumlahRM, { font: { bold: true }, alignment: { horizontal: 'center' } }).numFmt = '#,##0.00';
-    for (let b = H; b <= J; b++) for (const k of 'ABCDEF') {
-      // KEKERAPAN (C:E) satu kotak; bingkai luar tebal
-      l.getCell(k + b).border = {
-        top: b === H ? tebal : nipis, bottom: b === J ? tebal : nipis,
-        left: k === 'A' ? tebal : k === 'D' || k === 'E' ? undefined : nipis,
-        right: k === 'F' ? tebal : k === 'C' || k === 'D' ? undefined : nipis };
-    }
-    tulis(l, 'A' + (J + 2), `Jumlah imbuhan bagi setiap jam bertugas ialah sebanyak RM${rm(kadar())} ***`);
-
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([await wb.xlsx.writeBuffer()], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
-    a.download = `Surat Claim ${namaBulan()}.xlsx`;
-    a.click();
-    mesej('Surat claim dimuat turun');
-  } catch (err) { mesej(err.message); }
+function suratHTML() {
+  const ada = senaraiBayaran(), kini = new Date(), bln = namaBulan().toUpperCase();
+  const jumlahRM = ada.reduce((s, x) => s + jumlah(x.senarai), 0) * kadar();
+  const ribu = n => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const MTAQ = 'Maahad Tahfiz Al-Quran Wal Qiraat,<br>16600 Pulai Chondong,<br>Kelantan.';
+  return `<div class="halaman surat">
+    <p>Panitia Al-Quran,<br>${MTAQ}</p><hr>
+    <div class="alamat"><p>Ke majlis,<br><br>YBrs Pengetua,<br>${MTAQ}</p>
+      <p>Ruj. Kami: 700-1/26 (&nbsp;&nbsp;&nbsp;)<br>Tarikh: ${tarikhHijri(kini)}<br>Bersamaan: ${kini.getDate()} ${BULAN[kini.getMonth()]} ${kini.getFullYear()}</p></div>
+    <p>Tuan,</p>
+    <p style="margin-top:9mm"><b>POHON PERUNTUKAN BAYARAN IMBUHAN KELAS AL-QURAN MALAM DAN HUJUNG MINGGU BAGI BULAN ${bln}</b></p>
+    <p>Dengan segala hormatnya perkara di atas adalah dirujuk.</p>
+    <ol start="2">
+      <li>Untuk makluman pihak tuan bahawa Unit Al-Quran dan Tahfiz MTAQWQ telah menyusun jadual bertugas bagi setiap guru Al-Quran untuk memantau kelas Al-Quran bagi meningkatkan prestasi hafalan Al-Quran di kalangan pelajar.</li>
+      <li>Sehubungan dengan itu kami memohon peruntukan kewangan sebanyak <b>RM${rm(jumlahRM)}</b> sebagai bayaran imbuhan kepada guru-guru yang bertugas kelas Al-Quran sebagaimana senarai dan jadual yang dilampirkan.</li>
+      <li>Semoga permohonan ini mendapat perhatian dan pertimbangan daripada pihak tuan dan seterusnya saya dahului dengan ucapan ribuan terima kasih.</li>
+    </ol>
+    <p>Sekian, terima kasih.</p>
+    <p><b><i>“RAJA DAN RAKYAT, BERPISAH TIADA”</i></b></p>
+    <p><b><i>“SEMOGA ALLAH MELINDUNGI TUANKU DUNIA DAN AKHIRAT”</i></b></p>
+    <p>Saya Yang Menjalankan Amanah,</p>
+    <p style="margin-top:18mm"><b>(NORRUZAIMI BIN RUSMAN)</b><br>Penolong Kanan Al-Quran,<br>Maahad Tahfiz Al-Quran Wal Qiraat</p>
+  </div>
+  <div class="halaman surat">
+    <div class="tajuk" style="font-size:14pt;margin-top:6mm">SENARAI PENERIMA IMBUHAN<br>KELAS AL-QURAN MALAM &amp; HUJUNG MINGGU<br>BULAN ${bln}</div>
+    <table class="penerima"><thead><tr><th style="width:6%">BIL</th><th>NAMA</th><th style="width:25%">KEKERAPAN</th><th style="width:19%">JUMLAH (RM)</th></tr></thead>
+    <tbody>${Array.from({ length: Math.max(23, ada.length) }, (_, i) => {
+      const x = ada[i], j = x && jumlah(x.senarai);
+      return `<tr><td>${i + 1}</td><td class="catatan">${x ? esc(namaSurat(x.g.nama)) : ''}</td>
+        <td>${x ? `<div class="kekerapan"><span>${jamTeks(j)} Jam</span><span>x</span><span>RM${kadar()}</span></div>` : ''}</td><td>${x ? ribu(j * kadar()) : ''}</td></tr>`;
+    }).join('')}
+    <tr><td colspan="3"><b>Jumlah</b></td><td><b>${ribu(jumlahRM)}</b></td></tr></tbody></table>
+    <p>Jumlah imbuhan bagi setiap jam bertugas ialah sebanyak RM${rm(kadar())} ***</p>
+  </div>`;
+}
+window.suratClaim = () => {
+  if (!senaraiBayaran().length) return mesej('Tiada rekod untuk bulan ini');
+  const tajuk = document.title;
+  document.title = `Surat Claim ${namaBulan()}`; // nama fail bila pilih "Save as PDF"
+  $('borangAdmin').innerHTML = suratHTML();
+  print();
+  document.title = tajuk; lukisAdmin();
 };
 
 const KEPALA = `<div class="kepala"><img src="logo.png" alt=""><div>
