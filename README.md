@@ -1,47 +1,36 @@
-# Tuntutan Kelas Al-Quran
+# e-Tuntutan Kelas Al-Quran
 
 Website untuk guru merekod kelas Al-Quran yang diajar setiap hari dan menjana Borang Tuntutan Mengajar (MTAQ Pulai Chondong) di hujung bulan. Semua data disimpan dalam satu Google Sheet sekolah.
 
-- `index.html`: website (GitHub Pages: https://munirrr19.github.io/tuntutan-kelas/)
-- `Code.gs`: skrip Google Apps Script yang terikat pada Google Sheet "Tuntutan Kelas"
+| | |
+|---|---|
+| **Laman** | https://munirrr19.github.io/tuntutan-kelas/ (GitHub Pages) |
+| **Pelayan** | Google Apps Script (`Code.gs`) yang terikat pada Google Sheet "Tuntutan Kelas" |
+| **Pangkalan data** | Google Sheet sekolah |
 
-## Untuk admin
+## Ciri utama
+- **Link peribadi** untuk setiap guru, tanpa kata laluan. Link boleh dibatalkan dan dijana semula oleh admin.
+- **Catat** kelas selepas mengajar: tarikh, Tingkatan, masa mula dan tamat (setiap 15 minit). Amaran jika bertindih.
+- **Simpan serta-merta** dengan gilir di telefon: rekod tidak hilang walaupun tiada internet.
+- **Borang** bulanan dengan jumlah jam dan RM. Butang **SELESAI** mengunci bulan itu.
+- **Admin:** status semua guru, senarai penerima imbuhan dan surat claim (PDF).
+- Kadar sejam dan kelas intensif ditetapkan dalam Sheet.
+- Boleh dipasang di skrin utama telefon (PWA).
 
-### Tambah guru baru
-1. Buka Google Sheet **Tuntutan Kelas** dan pergi ke tab **Guru**.
-2. Isi satu baris baru dengan **nama**, **kp** dan **telefon** sahaja.
-3. Pilih menu **Tuntutan Kelas → Jana token & link guru**. Lajur `id`, `token` dan `link` akan terisi sendiri.
-4. Tekan **Hantar** di lajur `whatsapp` (lajur H). WhatsApp akan dibuka ke nombor guru itu bersama link dan cara guna. Semak mesej, kemudian tekan Send. Link ini adalah peribadi, jadi jangan hantar ke group.
+## Dokumen
 
-### Jadikan seseorang admin
-Taip `ya` dalam lajur **admin** untuk guru itu. Admin akan nampak tab **Admin** dalam website, yang menunjukkan senarai semua guru serta jumlah jam dan RM, dan membolehkan admin mencetak borang setiap guru atau semua sekali.
+| Dokumen | Untuk siapa |
+|---|---|
+| [docs/panduan-guru.md](docs/panduan-guru.md) | Guru: catat kelas, Borang, SELESAI |
+| [docs/panduan-admin.md](docs/panduan-admin.md) | Admin / Setiausaha: tambah guru, link, tetapan, claim |
+| [docs/panduan-serahan.md](docs/panduan-serahan.md) | Pengganti: akses, sandaran, pemulihan |
+| [docs/pembangunan.md](docs/pembangunan.md) | Pembangun: seni bina, kemas kini laman dan `Code.gs` |
+| [docs/data.md](docs/data.md) | Struktur Sheet dan API |
+| [CHANGELOG.md](CHANGELOG.md) | Sejarah perubahan |
 
-Admin yang juga perlu menambah guru (contohnya Setiausaha) mesti diberi akses **Editor** kepada Google Sheet ini melalui butang Share.
+## Kemas kini pantas
+- **Laman:** ubah `index.html` dan push ke `main`.
+- **Code.gs:** tampal dalam Extensions → Apps Script, jalankan **setup** sekali, kemudian **Deploy → Manage deployments → Edit → New version → Deploy**. Jangan cipta deployment baharu.
 
-### Buang guru atau tukar link
-- **Buang guru:** padam baris guru itu. Rekod lama guru itu kekal dalam tab Kehadiran.
-- **Link terdedah:** kosongkan sel **token** guru itu dan jana semula. Link lama akan terus tidak berfungsi.
-
-### Tukar kadar sejam
-Dalam tab **Tetapan**, tambah baris `kadar` dengan nilai `30` (atau kadar baru). Jika tiada baris ini, kadar asal ialah RM30.
-
-### Kelas intensif (cuti panjang)
-Dalam tab **Tetapan**, tambah baris `intensif` dengan bilangan kelas, contohnya `7`. Pilihan **Kelas 1** hingga **Kelas 7** akan muncul dalam dropdown Tingkatan guru. Untuk menutup musim intensif, kosongkan atau padam baris itu. Rekod kelas intensif yang lama tidak terjejas.
-
-## Untuk guru
-1. Buka link peribadi daripada admin. Anda hanya perlu buat ini sekali di setiap telefon.
-2. Di tab **Tetapan**, semak Nama, No KP dan No Telefon.
-3. **Catat:** isi selepas setiap kelas.
-4. **Borang:** di hujung bulan, semak borang dan tekan **SELESAI**. Rekod bulan itu akan dikunci, dan Setiausaha boleh nampak borang anda sudah siap. Jika perlu ubah, tekan **Buka semula untuk ubah**.
-
-Di tab **Admin**, setiap guru ditunjuk sebagai ✓ Selesai atau Belum selesai. Guru yang belum selesai berada di atas. Status ini disimpan dalam helaian `Selesai` di Sheet.
-
-Untuk urusan claim:
-- **Senarai penerima imbuhan** mencetak satu halaman senarai nama, No KP, jam dan RM semua guru.
-- **Surat claim (PDF)** mencetak surat permohonan kepada Pengetua bersama lampiran senarai penerima. Dalam tetingkap cetak, pilih **Save as PDF** untuk mendapatkan fail PDF.
-
-Di telefon, pilih **Add to Home screen** supaya website ini boleh dibuka seperti app.
-
-## Kemas kini Code.gs
-1. Tampal kod baru dalam Extensions → Apps Script, simpan, dan jalankan **setup** sekali.
-2. Kemudian pilih **Deploy → Manage deployments → Edit (ikon pensel) → Version: New version → Deploy**. URL web app kekal sama.
+## Privasi
+Repo ini **awam**. Jangan commit senarai guru, No KP, nombor telefon atau eksport Sheet. Fail seperti ini sudah dikecualikan dalam `.gitignore`.
