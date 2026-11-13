@@ -51,6 +51,9 @@
 
   /* Borang: susunan meniru borang kertas, A4 */
   .pratonton { overflow-x: auto; background: #e5e7eb; padding: 12px; border-radius: 10px; }
+  /* Tab Borang: lebarkan di skrin besar; halaman diskala ikut lebar skrin (lihat muatkanSkala) */
+  main:has(#tab-borang.aktif) { max-width: 900px; }
+  #borang { padding: 8px; }
   .halaman { width: 210mm; min-height: 297mm; background: #fff; color: #000; padding: 9mm 14mm; margin: 0 auto 12px; font-family: Arial, Helvetica, sans-serif; font-size: 10.5pt; }
   .kepala { display: flex; align-items: center; gap: 14px; }
   .kepala img { width: 18mm; }
@@ -85,7 +88,7 @@
     main { max-width: none; padding: 0; }
     section:not(.aktif) { display: none !important; }
     .pratonton { background: none; padding: 0; overflow: visible; }
-    .halaman { margin: 0; page-break-after: always; }
+    .halaman { margin: 0; page-break-after: always; zoom: 1 !important; }
     .halaman:last-child { page-break-after: auto; }
   }
 </style>
@@ -397,7 +400,17 @@ function lukis() {
        <button class="btn utama" ${senarai.length ? '' : 'disabled'} onclick="tandaSelesai(false)">SELESAI</button>`;
 
   $('borang').innerHTML = borangHTML(guru, senarai);  if (guru.admin) lukisAdmin();
+  skalaBorang();
 }
+
+// Skala borang A4 supaya muat lebar skrin (fon/tab/komputer) tanpa perlu scroll sisi
+function skalaBorang() {
+  const kotak = $('borang'), lebar = kotak.clientWidth - 16;
+  if (lebar <= 0) return;
+  const z = Math.min(1, lebar / (210 * 96 / 25.4));
+  kotak.querySelectorAll('.halaman').forEach(h => h.style.zoom = z);
+}
+new ResizeObserver(skalaBorang).observe($('borang'));
 
 // Guru yang ada rekod bulan ini, ikut nama
 const senaraiBayaran = () => semuaGuru.map(g => ({ g, senarai: entriBulan(g.id) })).filter(x => x.senarai.length)
