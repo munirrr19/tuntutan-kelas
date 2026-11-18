@@ -7,6 +7,8 @@
 <link rel="icon" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com">
 <meta name="theme-color" content="#0f6b4f">
 <meta name="apple-mobile-web-app-title" content="e-Tuntutan Al-Quran">
 <style>
@@ -530,6 +532,7 @@ let kadarSejam = 30;
 let pilihCetak = null; // admin: id guru untuk dicetak seorang, null = semua
 let idUbah = null;
 let sedangMuat = true;
+let menyegar = false;
 let adminTapis = 'semua';
 let adminCari = '';
 let bulan = new Date().toLocaleDateString('en-CA').slice(0, 7);
@@ -590,8 +593,8 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '
 
 function kemasSync() {
   const pill = $('syncPill'), q = gilir().length;
-  pill.className = 'sync-pill' + (!navigator.onLine ? ' offline' : (menghantar || q) ? ' sibuk' : '');
-  $('syncTeks').textContent = !navigator.onLine ? 'Luar talian' : (menghantar || q) ? `Menghantar (${q || 1})` : 'Disegerak';
+  pill.className = 'sync-pill' + (!navigator.onLine ? ' offline' : (menghantar || q || menyegar) ? ' sibuk' : '');
+  $('syncTeks').textContent = !navigator.onLine ? 'Luar talian' : (menghantar || q) ? `Menghantar (${q || 1})` : menyegar ? 'Menyegar...' : 'Disegerak';
 }
 
 // ---- API (Google Apps Script) ----
@@ -621,27 +624,54 @@ window.anjakBulan = delta => {
   tukarBulan(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
 };
 
-async function muat() {
-  sedangMuat = true; lukis();
+function bacaCache(tahun) {
   try {
-    const tahun = tahunDimuat;
+    const c = JSON.parse(localStorage.getItem('cache_' + tahun) || 'null');
+    return c && c.token === token() ? c.d : null;
+  } catch { return null; }
+}
+function tulisCache(tahun, d) {
+  try { localStorage.setItem('cache_' + tahun, JSON.stringify({ token: token(), d })); } catch {}
+}
+function gunaData(d) {
+  guru = d.guru;
+  entri = d.entri.filter(x => !gilir().some(q => q.id === x.id)).concat(gilir().map(q => ({ ...q, guru: guru.id })));
+  kadarSejam = d.kadar;
+  const t = $('tingkatan').value;
+  isiTingkatan(d.intensif);
+  $('tingkatan').value = idUbah ? t : localStorage.getItem('tingkatanAkhir') || t;
+  if (!$('tingkatan').value) $('tingkatan').value = TINGKATAN[0];
+  semuaGuru = d.semuaGuru || [];
+  selesai = d.selesai || [];
+  $('navAdmin').hidden = !guru.admin;
+  $('namaHeader').textContent = guru.nama ? `${guru.nama} · MTAQ` : 'MTAQ Pulai Chondong';
+  isiTetapan(); lukis(); kemasRingkas(); lukisChipsTingkatan(); kemasBannerKunci();
+}
+async function muat() {
+  const tahun = tahunDimuat;
+  const c = bacaCache(tahun);
+  if (c) {
+    sedangMuat = false;
+    gunaData(c);
+  } else {
+    sedangMuat = true;
+    lukis();
+  }
+  menyegar = !!token(); kemasSync();
+  try {
     const d = await api();
     if (tahun !== tahunDimuat) return;
-    guru = d.guru;
-    entri = d.entri.filter(x => !gilir().some(q => q.id === x.id)).concat(gilir().map(q => ({ ...q, guru: guru.id })));
-    kadarSejam = d.kadar;
-    const t = $('tingkatan').value;
-    isiTingkatan(d.intensif);
-    $('tingkatan').value = idUbah ? t : localStorage.getItem('tingkatanAkhir') || t;
-    if (!$('tingkatan').value) $('tingkatan').value = TINGKATAN[0];
-    semuaGuru = d.semuaGuru || [];
-    selesai = d.selesai || [];
-    $('navAdmin').hidden = !guru.admin;
-    $('namaHeader').textContent = guru.nama ? `${guru.nama} · MTAQ` : 'MTAQ Pulai Chondong';
+    tulisCache(tahun, d);
     sedangMuat = false;
-    isiTetapan(); lukis(); kemasRingkas(); lukisChipsTingkatan(); kemasBannerKunci();
+    gunaData(d);
     hantar();
-  } catch (e) { sedangMuat = false; $('namaHeader').textContent = 'MTAQ Pulai Chondong'; lukis(); mesej(e.message, true); }
+  } catch (e) {
+    sedangMuat = false;
+    if (!c) { $('namaHeader').textContent = 'MTAQ Pulai Chondong'; lukis(); }
+    mesej(e.message, true);
+  } finally {
+    menyegar = false; kemasSync();
+  }
 }
 
 // ---- Gilir simpanan ----
