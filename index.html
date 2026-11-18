@@ -52,8 +52,8 @@
   /* Borang: susunan meniru borang kertas, A4 */
   .pratonton { overflow-x: auto; background: #e5e7eb; padding: 12px; border-radius: 10px; }
   /* Tab Borang: lebarkan di skrin besar; halaman diskala ikut lebar skrin (lihat muatkanSkala) */
-  main:has(#tab-borang.aktif) { max-width: 900px; }
-  #borang { padding: 8px; }
+  main:has(#tab-borang.aktif), main:has(#tab-admin.aktif) { max-width: 900px; }
+  #borang, #borangAdmin { padding: 8px; }
   .halaman { width: 210mm; min-height: 297mm; background: #fff; color: #000; padding: 9mm 14mm; margin: 0 auto 12px; font-family: Arial, Helvetica, sans-serif; font-size: 10.5pt; }
   .kepala { display: flex; align-items: center; gap: 14px; }
   .kepala img { width: 18mm; }
@@ -405,12 +405,15 @@ function lukis() {
 
 // Skala borang A4 supaya muat lebar skrin (fon/tab/komputer) tanpa perlu scroll sisi
 function skalaBorang() {
-  const kotak = $('borang'), lebar = kotak.clientWidth - 16;
-  if (lebar <= 0) return;
-  const z = Math.min(1, lebar / (210 * 96 / 25.4));
-  kotak.querySelectorAll('.halaman').forEach(h => h.style.zoom = z);
+  for (const kotak of [$('borang'), $('borangAdmin')]) {
+    const lebar = kotak.clientWidth - 16;
+    if (lebar <= 0) continue;
+    const z = Math.min(1, lebar / (210 * 96 / 25.4));
+    kotak.querySelectorAll('.halaman').forEach(h => h.style.zoom = z);
+  }
 }
 new ResizeObserver(skalaBorang).observe($('borang'));
+new ResizeObserver(skalaBorang).observe($('borangAdmin'));
 
 // Guru yang ada rekod bulan ini, ikut nama
 const senaraiBayaran = () => semuaGuru.map(g => ({ g, senarai: entriBulan(g.id) })).filter(x => x.senarai.length)
@@ -430,6 +433,7 @@ function lukisAdmin() {
       + `<div class="jumlah">${siap}/${semua.length} guru selesai · ${jamTeks(jam)} jam · RM${rm(jam * kadar())}</div>`
     : '<div class="kosong">Tiada guru</div>';
   $('borangAdmin').innerHTML = ada.filter(x => !pilihCetak || x.g.id === pilihCetak).map(x => borangHTML(x.g, x.senarai)).join('');
+  skalaBorang();
 }
 window.cetakGuru = id => { pilihCetak = id; lukisAdmin(); print(); pilihCetak = null; lukisAdmin(); };
 
@@ -446,7 +450,7 @@ function ringkasanHTML() {
       <div>Tarikh : ..............................</div></div>
   </div>`;
 }
-window.cetakRingkasan = () => { $('borangAdmin').innerHTML = ringkasanHTML(); print(); lukisAdmin(); };
+window.cetakRingkasan = () => { $('borangAdmin').innerHTML = ringkasanHTML(); skalaBorang(); print(); lukisAdmin(); };
 
 // ---- Surat claim (PDF melalui cetak): muka 1 surat, muka 2 senarai penerima, ikut contoh Panitia Al-Quran ----
 const BULAN_HIJRI = ['Muharam', 'Safar', 'Rabiulawal', 'Rabiulakhir', 'Jamadilawal', 'Jamadilakhir', 'Rejab', 'Syaaban', 'Ramadan', 'Syawal', 'Zulkaedah', 'Zulhijah'];
@@ -501,7 +505,7 @@ window.suratClaim = () => {
   if (!senaraiBayaran().length) return mesej('Tiada rekod untuk bulan ini');
   const tajuk = document.title;
   document.title = `Surat Claim ${namaBulan()}`; // nama fail bila pilih "Save as PDF"
-  $('borangAdmin').innerHTML = suratHTML();
+  $('borangAdmin').innerHTML = suratHTML(); skalaBorang();
   print();
   document.title = tajuk; lukisAdmin();
 };
@@ -523,7 +527,7 @@ function borangHTML(profil, senarai) {
     <table><thead><tr><th style="width:9%">BIL</th><th style="width:14%">TARIKH</th><th style="width:13%">TINGKATAN</th><th style="width:26%">MASA</th><th style="width:13%">JUMLAH JAM</th><th>CATATAN</th></tr></thead>
     <tbody>${Array.from({ length: BARIS_SEHALAMAN }, (_, i) => {
       const x = h[i], bil = hi * BARIS_SEHALAMAN + i + 1;
-      return x ? `<tr><td>${bil}</td><td>${tarikhTeks(x.tarikh)}</td><td>${esc(x.tingkatan)}</td><td>${masaTeks(x.mula)} – ${masaTeks(x.tamat)}</td><td>${jamTeks(x.jam)}</td><td class="catatan">${esc(x.catatan)}</td></tr>`
+      return x ? `<tr><td>${bil}</td><td>${tarikhTeks(x.tarikh)}</td><td>${esc(x.tingkatan)}</td><td>${masaTeks(x.mula)} – ${masaTeks(x.tamat)}</td><td>${jamTeks(x.jam)}</td><td>${esc(x.catatan)}</td></tr>`
                : `<tr><td>${bil}</td><td></td><td></td><td></td><td></td><td></td></tr>`;
     }).join('')}</tbody></table>
     ${hi < halaman.length - 1 ? '<p style="text-align:right"><i>bersambung...</i></p>' : `
