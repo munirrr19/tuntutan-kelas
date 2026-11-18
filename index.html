@@ -282,9 +282,13 @@
   .item .btn { padding: 5px 9px; font-size: .75rem; border-radius: 8px; }
   .kosong { color: var(--kelabu); text-align: center; padding: 24px 0; font-size: .9rem; }
 
-  /* Admin Progress */
+  /* Admin Progress & Senarai Padat */
   .progress-wrap { width: 100%; height: 8px; background: #e5e7eb; border-radius: 999px; overflow: hidden; margin: 8px 0 12px; }
   .progress-bar { height: 100%; background: var(--hijau-grad); border-radius: 999px; transition: width .3s ease; }
+  #ringkasAdmin .item { padding: 8px 0; gap: 8px; }
+  #ringkasAdmin .item-atas b { font-size: .82rem; line-height: 1.25; }
+  #ringkasAdmin .item small { font-size: .73rem; margin-top: 2px; }
+  #ringkasAdmin .lencana { font-size: .66rem; padding: 2px 7px; }
 
   /* Skeleton loading */
   .skel { height: 54px; border-radius: 10px; background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%); background-size: 200% 100%; animation: kilau 1.2s infinite; margin-bottom: 8px; }
@@ -924,7 +928,7 @@ function lukisAdmin() {
           <div class="item-atas"><b>${esc(g.nama) || '(tiada nama)'}</b>
           <span class="lencana ${s ? 'lencana-hijau' : 'lencana-merah'}">${s ? '✓ Selesai' : 'Belum'}</span></div>
           <small class="tabular">${senarai.length ? `${senarai.length} kelas · ${jamTeks(jumlah(senarai))} jam · RM${rm(jumlah(senarai) * kadar())}` : 'Tiada rekod'}</small></div>
-          ${senarai.length ? `<button class="btn btn-cetak" style="height:32px;padding:0 12px;font-size:.78rem" onclick="cetakGuru('${g.id}')">Cetak</button>` : ''}</div>`).join('')
+          ${senarai.length ? `<button class="btn btn-cetak" style="height:28px;padding:0 10px;font-size:.73rem" onclick="cetakGuru('${g.id}')">Cetak</button>` : ''}</div>`).join('')
         : '<div class="kosong">Tiada guru sepadan</div>')
     : '<div class="kosong">Tiada guru</div>';
   $('borangAdmin').innerHTML = ada.filter(x => !pilihCetak || x.g.id === pilihCetak).map(x => borangHTML(x.g, x.senarai)).join('');
