@@ -192,12 +192,6 @@
   .masa-kad small { display: block; font-size: .72rem; color: var(--kelabu); margin-bottom: 2px; }
   .masa-baris { display: flex; align-items: center; gap: 4px; }
   .masa-baris select { border: 0; padding: 2px 0; font-weight: 600; background: transparent; box-shadow: none; }
-  .stepper { display: flex; gap: 6px; flex: none; }
-  .stepper button {
-    width: 34px; height: 34px; border-radius: 8px; border: 0;
-    background: #f3f4f6; color: #111827; font-size: 1rem; font-weight: 700; cursor: pointer;
-  }
-  .stepper button:hover { background: #e5e7eb; }
 
   .pantas { display: flex; gap: 8px; margin-top: 8px; }
   .pantas button { flex: 1; }
@@ -438,10 +432,6 @@
           <small>Masa tamat</small>
           <div class="masa-baris">
             <select id="tamat" aria-label="Masa tamat"></select>
-            <div class="stepper">
-              <button type="button" onclick="larasTamat(-15)" aria-label="Kurang 15 minit">−</button>
-              <button type="button" onclick="larasTamat(15)" aria-label="Tambah 15 minit">+</button>
-            </div>
           </div>
         </div>
       </div>
@@ -741,13 +731,14 @@ isiTingkatan(0);
 for (const id of ['mula', 'tamat']) $(id).innerHTML = PILIHAN_MASA.map(t => `<option value="${t}">${masaTeks(t)}</option>`).join('');
 
 const HARI = ['Ahad', 'Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu'];
+const hariTeks = t => HARI[new Date(t + 'T00:00').getDay()];
 function kemasBannerKunci() {
   const t = $('tarikh').value;
   $('bannerKunci').style.display = (t && guru.id && statusSelesai(guru.id, t.slice(0, 7))) ? 'flex' : 'none';
 }
 function paparTarikh() {
   const v = $('tarikh').value;
-  $('tarikhPapar').textContent = v ? `${tarikhTeks(v)} (${HARI[new Date(v + 'T00:00').getDay()]})` : 'Pilih tarikh';
+  $('tarikhPapar').textContent = v ? `${tarikhTeks(v)} (${hariTeks(v)})` : 'Pilih tarikh';
   kemasBannerKunci();
 }
 $('tarikh').onchange = paparTarikh;
@@ -762,11 +753,6 @@ window.setMulaPreset = t => {
   const d = Math.max(minit($('tamat').value) - minit($('mula').value), 30);
   $('mula').value = t;
   setTamat(d);
-};
-window.larasTamat = delta => {
-  const next = Math.min(Math.max(minit($('tamat').value) + delta, minit($('mula').value) + 15), 23 * 60);
-  $('tamat').value = hhmm(next);
-  kemasRingkas();
 };
 
 function kemasRingkas() {
@@ -1019,11 +1005,11 @@ function borangHTML(profil, senarai) {
     <div class="medan"><b>NAMA :</b><span>${esc(profil.nama)}</span></div>
     <div class="medan"><b>NO KAD PENGENALAN :</b><span>${esc(profil.kp)}</span><b>NO TELEFON :</b><span>${esc(profil.telefon)}</span></div>
     <p>Dengan ini, saya menuntut bayaran mengajar kelas Al Quran di Maahad Tahfiz Al Quran Wal Qiraat sebagaimana kenyataan berikut:</p>
-    <table><thead><tr><th style="width:9%">BIL</th><th style="width:14%">TARIKH</th><th style="width:13%">TINGKATAN</th><th style="width:26%">MASA</th><th style="width:13%">JUMLAH JAM</th><th>CATATAN</th></tr></thead>
+    <table><thead><tr><th style="width:6%">BIL</th><th style="width:13%">TARIKH</th><th style="width:11%">HARI</th><th style="width:12%">TINGKATAN</th><th style="width:25%">MASA</th><th style="width:11%">JUMLAH JAM</th><th>CATATAN</th></tr></thead>
     <tbody>${Array.from({ length: BARIS_SEHALAMAN }, (_, i) => {
       const x = h[i], bil = hi * BARIS_SEHALAMAN + i + 1;
-      return x ? `<tr><td>${bil}</td><td>${tarikhTeks(x.tarikh)}</td><td>${esc(x.tingkatan)}</td><td>${masaTeks(x.mula)} – ${masaTeks(x.tamat)}</td><td>${jamTeks(x.jam)}</td><td>${esc(x.catatan)}</td></tr>`
-               : `<tr><td>${bil}</td><td></td><td></td><td></td><td></td><td></td></tr>`;
+      return x ? `<tr><td>${bil}</td><td>${tarikhTeks(x.tarikh)}</td><td>${hariTeks(x.tarikh)}</td><td>${esc(x.tingkatan)}</td><td>${masaTeks(x.mula)} – ${masaTeks(x.tamat)}</td><td>${jamTeks(x.jam)}</td><td class="catatan">${esc(x.catatan)}</td></tr>`
+               : `<tr><td>${bil}</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
     }).join('')}</tbody></table>
     ${hi < halaman.length - 1 ? '<p style="text-align:right"><i>bersambung...</i></p>' : `
     <p style="margin:5mm 0 0"><b>JUMLAH JAM MENGAJAR</b></p>
