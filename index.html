@@ -41,19 +41,20 @@
   header {
     background: linear-gradient(180deg, #0f6b4f 0%, #094a36 100%);
     color: #fff;
-    padding: calc(8px + env(safe-area-inset-top)) 12px 8px;
+    padding: calc(14px + env(safe-area-inset-top)) 16px 14px;
+    min-height: 68px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     position: sticky;
     top: 0;
     z-index: 10;
     box-shadow: 0 2px 8px rgba(0,0,0,.1);
   }
-  header img { height: 32px; width: auto; flex: none; }
+  header img { height: 40px; width: auto; flex: none; }
   .header-teks { flex: 1; min-width: 0; }
-  header h1 { font-size: .9rem; margin: 0; line-height: 1.15; }
-  .header-sub { font-size: .7rem; color: rgba(255,255,255,.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+  header h1 { font-size: 1rem; margin: 0; line-height: 1.2; }
+  .header-sub { font-size: .76rem; color: rgba(255,255,255,.88); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
   .sync-pill {
     display: inline-flex; align-items: center; gap: 5px;
     padding: 4px 8px; border-radius: 999px; border: 0;
@@ -72,7 +73,7 @@
     backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--garis);
     position: sticky;
-    top: 58px;
+    top: 68px;
     z-index: 9;
   }
   nav button {
