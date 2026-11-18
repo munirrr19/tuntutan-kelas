@@ -180,7 +180,7 @@
   }
   .chip:hover { border-color: var(--hijau); color: var(--hijau); }
   .chip.aktif { background: var(--hijau-grad); color: #fff; border-color: transparent; box-shadow: 0 2px 6px rgba(15,107,79,.22); }
-  .chip-kecil { padding: 3px 8px; font-size: .72rem; border-radius: 6px; background: var(--hijau-muda); color: var(--hijau); border: 1px solid rgba(15,107,79,.2); font-weight: 600; cursor: pointer; }
+  .chip-kecil { padding: 6px 10px; font-size: .74rem; border-radius: 8px; background: var(--hijau-muda); color: var(--hijau); border: 1px solid rgba(15,107,79,.2); font-weight: 600; cursor: pointer; }
 
   /* Masa & Stepper */
   .dua { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -188,10 +188,10 @@
   .masa-kad small { display: block; font-size: .72rem; color: var(--kelabu); margin-bottom: 2px; }
   .masa-baris { display: flex; align-items: center; gap: 4px; }
   .masa-baris select { border: 0; padding: 2px 0; font-weight: 600; background: transparent; box-shadow: none; }
-  .stepper { display: flex; gap: 4px; flex: none; }
+  .stepper { display: flex; gap: 6px; flex: none; }
   .stepper button {
-    width: 26px; height: 26px; border-radius: 7px; border: 0;
-    background: #f3f4f6; color: #111827; font-weight: 700; cursor: pointer;
+    width: 34px; height: 34px; border-radius: 8px; border: 0;
+    background: #f3f4f6; color: #111827; font-size: 1rem; font-weight: 700; cursor: pointer;
   }
   .stepper button:hover { background: #e5e7eb; }
 
@@ -339,6 +339,10 @@
   .penerima td, .penerima th { height: 6.3mm; white-space: nowrap; }
   .kekerapan { display: flex; justify-content: space-between; }
 
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+
   @media print {
     @page { size: A4; margin: 0; }
     body { background: #fff; }
@@ -365,30 +369,33 @@
 </header>
 
 <nav>
-  <button data-tab="catat" class="aktif">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+  <button data-tab="catat" class="aktif" aria-current="page">
+    <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
     <span>Catat</span>
   </button>
   <button data-tab="senarai">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+    <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
     <span>Senarai</span>
   </button>
   <button data-tab="borang">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/></svg>
+    <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/></svg>
     <span>Borang</span>
   </button>
   <button data-tab="tetapan">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     <span>Tetapan</span>
   </button>
   <button data-tab="admin" id="navAdmin" hidden>
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     <span>Admin</span>
   </button>
 </nav>
 
 <main>
   <section id="tab-catat" class="aktif">
+    <div id="bannerToken" class="banner-amaran" style="display:none">
+      <span>Pautan peribadi diperlukan. Sila buka link peribadi anda daripada admin.</span>
+    </div>
     <div id="bannerKunci" class="banner-amaran" style="display:none">
       <span>Bulan ini sudah ditanda <b>SELESAI</b>. Buka semula di tab Borang untuk tambah atau ubah.</span>
       <button type="button" onclick="tukarTab('borang')">Ke Borang</button>
@@ -492,9 +499,9 @@
   </section>
 </main>
 
-<div class="mesej" id="mesej"><span class="mesej-dot"></span><span id="mesejTeks"></span></div>
+<div class="mesej" id="mesej" role="status" aria-live="polite"><span class="mesej-dot"></span><span id="mesejTeks"></span></div>
 
-<div class="modal-latar" id="modalLatar" role="dialog" aria-modal="true">
+<div class="modal-latar" id="modalLatar" role="dialog" aria-modal="true" aria-labelledby="modalTajuk">
   <div class="modal-kotak">
     <h3 id="modalTajuk">Sahkan</h3>
     <p id="modalTeks"></p>
@@ -555,6 +562,7 @@ function mesej(teks, ralat = false) {
 }
 function sahkan(tajuk, teks, labelTerus = 'Teruskan', bahaya = false) {
   return new Promise(resolve => {
+    const asal = document.activeElement;
     $('modalTajuk').textContent = tajuk;
     $('modalTeks').textContent = teks;
     const btn = $('modalTerus');
@@ -562,7 +570,15 @@ function sahkan(tajuk, teks, labelTerus = 'Teruskan', bahaya = false) {
     btn.className = bahaya ? 'btn bahaya' : 'btn utama';
     btn.style.marginTop = '0';
     $('modalLatar').classList.add('buka');
-    const tutup = ok => { $('modalLatar').classList.remove('buka'); resolve(ok); };
+    $('modalBatal').focus();
+    const onKey = e => { if (e.key === 'Escape') tutup(false); };
+    const tutup = ok => {
+      $('modalLatar').classList.remove('buka');
+      removeEventListener('keydown', onKey);
+      if (asal && asal.focus) asal.focus();
+      resolve(ok);
+    };
+    addEventListener('keydown', onKey);
     $('modalBatal').onclick = () => tutup(false);
     $('modalLatar').onclick = e => { if (e.target === $('modalLatar')) tutup(false); };
     btn.onclick = () => tutup(true);
@@ -657,7 +673,11 @@ addEventListener('beforeunload', e => { if (gilir().length) e.preventDefault(); 
 
 // ---- Tab ----
 function tukarTab(nama) {
-  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('aktif', b.dataset.tab === nama));
+  document.querySelectorAll('nav button').forEach(b => {
+    const aktif = b.dataset.tab === nama;
+    b.classList.toggle('aktif', aktif);
+    if (aktif) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  });
   document.querySelectorAll('section').forEach(s => s.classList.toggle('aktif', s.id === 'tab-' + nama));
   if (nama === 'borang' || nama === 'admin') skalaBorang();
 }
@@ -784,6 +804,7 @@ function lukis() {
   const senarai = entriBulan(guru.id);
   const jumlahJam = jumlah(senarai);
   const s = statusSelesai(guru.id);
+  $('bannerToken').style.display = token() ? 'none' : 'flex';
   kemasBannerKunci();
 
   $('kpiSenarai').innerHTML = `<div class="kpi-kad tabular">
@@ -795,7 +816,9 @@ function lukis() {
     </div>
   </div>`;
 
-  if (sedangMuat) {
+  if (!token()) {
+    $('senarai').innerHTML = '<div class="kosong">Pautan peribadi diperlukan. Sila buka link peribadi anda daripada admin.</div>';
+  } else if (sedangMuat) {
     $('senarai').innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
   } else {
     $('senarai').innerHTML = (s ? `<div class="ringkas" style="margin:0 0 8px">${teksSelesai(s)}</div>` : '')
@@ -859,7 +882,7 @@ function lukisAdmin() {
          <b class="tabular" style="color:var(--hijau)">${jamTeks(jam)} jam · RM${rm(jam * kadar())}</b>
        </div>
        <div class="progress-wrap"><div class="progress-bar" style="width:${peratus}%"></div></div>
-       <input type="search" placeholder="Cari nama guru..." value="${esc(adminCari)}" oninput="setAdminCari(this.value)" style="margin-bottom:8px">
+       <input type="search" aria-label="Cari nama guru" placeholder="Cari nama guru..." value="${esc(adminCari)}" oninput="setAdminCari(this.value)" style="margin-bottom:8px">
        <div class="chips" style="margin-bottom:10px">
          <button type="button" class="chip${adminTapis === 'semua' ? ' aktif' : ''}" onclick="setAdminTapis('semua')">Semua (${semua.length})</button>
          <button type="button" class="chip${adminTapis === 'belum' ? ' aktif' : ''}" onclick="setAdminTapis('belum')">Belum (${semua.length - siap})</button>
