@@ -28,7 +28,7 @@ Semua data dalam satu **Google Sheet** sekolah. `Code.gs` ialah skrip Apps Scrip
 | `whatsapp` | Butang Hantar (lajur H) |
 
 ## Tab `Tetapan`
-Pasangan `kunci` dan `nilai`: `kadar`, `intensif`. Lihat [panduan-admin.md](panduan-admin.md#tetapan).
+Pasangan `kunci` dan `nilai`: `kadar`, `intensif`, `jadual`. Lihat [panduan-admin.md](panduan-admin.md#tetapan).
 
 ## Tab `Selesai`
 Bulan yang guru tanda SELESAI: `guru` (id), `bulan` (`YYYY-MM`), `masa`. Selagi baris ada, rekod bulan itu dikunci.
@@ -37,10 +37,11 @@ Bulan yang guru tanda SELESAI: `guru` (id), `bulan` (`YYYY-MM`), `masa`. Selagi 
 
 | Kaedah | Fungsi |
 |---|---|
-| `GET ?token=&tahun=` | Profil guru, kadar, intensif, rekod setahun dan status Selesai. Admin menerima semua guru |
+| `GET ?token=&tahun=` | Profil guru, kadar, intensif, rekod setahun, status Selesai dan `jadual` (`{id, masa}` atau `null`). Admin menerima semua guru |
 | `POST {token, action: "simpan", entri}` | Tambah atau ubah satu rekod |
 | `POST {token, action: "padam", entri}` | Padam satu rekod |
 | `POST {token, action: "profil", profil}` | Kemas kini nama, KP, telefon |
+| `POST {token, action: "jadual", mime, data}` | Admin sahaja. Muat naik jadual (PDF/gambar, base64) ke Drive, ganti yang lama |
 | `POST {token, action: "selesai", bulan, batal?}` | Tanda atau buka semula SELESAI |
 
 Keselamatan:

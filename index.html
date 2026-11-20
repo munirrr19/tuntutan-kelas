@@ -503,10 +503,7 @@
     <div class="kad tiada-cetak">
       <b>Jadual kelas bulanan</b>
       <div class="label-petunjuk" id="statusJadual" style="margin:4px 0 10px"></div>
-      <div class="pantas" style="margin:0">
-        <label class="btn" style="margin:0">Kelas Malam<input type="file" accept="image/*,application/pdf" hidden onchange="muatNaikJadual('malam', this)"></label>
-        <label class="btn" style="margin:0">Hujung Minggu<input type="file" accept="image/*,application/pdf" hidden onchange="muatNaikJadual('hujung', this)"></label>
-      </div>
+      <label class="btn" style="margin:0">Muat naik jadual baru<input type="file" accept="image/*,application/pdf" hidden onchange="muatNaikJadual(this)"></label>
     </div>
     <div class="kad tiada-cetak" id="ringkasAdmin"></div>
     <div class="pratonton" id="borangAdmin"></div>
@@ -529,7 +526,6 @@
 <div class="modal-latar" id="jadualLatar" role="dialog" aria-modal="true" aria-labelledby="jadualTajuk">
   <div class="modal-kotak">
     <div class="label-baris" style="margin-top:0"><h3 id="jadualTajuk" style="margin:0">Jadual Kelas</h3><a class="label-petunjuk" id="jadualPenuh" target="_blank" rel="noopener">Buka penuh ↗</a></div>
-    <div class="chips" id="jadualChips"></div>
     <iframe id="jadualBingkai" title="Jadual kelas"></iframe>
     <button type="button" class="btn" style="width:100%;margin-top:10px" onclick="$('jadualLatar').classList.remove('buka')">Tutup</button>
   </div>
@@ -554,8 +550,7 @@ let sedangMuat = true;
 let menyegar = false;
 let adminTapis = 'semua';
 let adminCari = '';
-let jadual = {};      // {malam|hujung: {id, masa}}: fail Drive dimuat naik admin
-const JENIS_JADUAL = { malam: 'Kelas Malam', hujung: 'Hujung Minggu' };
+let jadual = null;    // {id, masa}: fail Drive jadual bulanan, dimuat naik admin
 let bulan = new Date().toLocaleDateString('en-CA').slice(0, 7);
 
 const minit = hhmm => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
@@ -664,7 +659,7 @@ function gunaData(d) {
   if (!$('tingkatan').value) $('tingkatan').value = TINGKATAN[0];
   semuaGuru = d.semuaGuru || [];
   selesai = d.selesai || [];
-  jadual = d.jadual || {}; kemasJadual();
+  jadual = d.jadual || null; kemasJadual();
   $('navAdmin').hidden = !guru.admin;
   $('namaHeader').textContent = guru.nama ? `${guru.nama} · MTAQ` : 'MTAQ Pulai Chondong';
   isiTetapan(); lukis(); kemasRingkas(); lukisChipsTingkatan(); kemasBannerKunci();
@@ -727,20 +722,13 @@ addEventListener('beforeunload', e => { if (gilir().length) e.preventDefault(); 
 
 // ---- Jadual bulanan ----
 function kemasJadual() {
-  $('btnJadual').hidden = !Object.keys(jadual).length;
-  $('statusJadual').textContent = Object.entries(JENIS_JADUAL)
-    .map(([k, n]) => `${n}: ${jadual[k] ? 'dikemas kini ' + tarikhTeks(jadual[k].masa) : 'belum ada'}`).join(' · ') + '. Tekan butang untuk muat naik gambar/PDF baru.';
+  $('btnJadual').hidden = !jadual;
+  $('statusJadual').textContent = (jadual ? 'Jadual semasa dimuat naik ' + tarikhTeks(jadual.masa) : 'Belum ada jadual')
+    + '. Muat naik PDF/gambar baru untuk menggantikannya.';
 }
-function tunjukJadual(jenis) {
-  const id = jadual[jenis].id;
-  $('jadualBingkai').src = `https://drive.google.com/file/d/${id}/preview`;
-  $('jadualPenuh').href = `https://drive.google.com/file/d/${id}/view`;
-  $('jadualChips').innerHTML = Object.keys(JENIS_JADUAL).filter(k => jadual[k])
-    .map(k => `<button type="button" class="chip${k === jenis ? ' aktif' : ''}" onclick="tunjukJadual('${k}')">${JENIS_JADUAL[k]}</button>`).join('');
-}
-window.tunjukJadual = tunjukJadual;
 window.bukaJadual = () => {
-  tunjukJadual(jadual.malam ? 'malam' : 'hujung');
+  $('jadualBingkai').src = `https://drive.google.com/file/d/${jadual.id}/preview`;
+  $('jadualPenuh').href = `https://drive.google.com/file/d/${jadual.id}/view`;
   $('jadualLatar').classList.add('buka');
 };
 $('jadualLatar').onclick = e => { if (e.target === $('jadualLatar')) $('jadualLatar').classList.remove('buka'); };
@@ -753,7 +741,7 @@ async function kecilkan(fail) {
   g.drawImage(img, 0, 0, c.width, c.height);
   return new Promise(ok => c.toBlob(ok, 'image/jpeg', .85));
 }
-window.muatNaikJadual = async (jenis, input) => {
+window.muatNaikJadual = async input => {
   const fail = input.files[0];
   input.value = '';
   if (!fail) return;
@@ -766,9 +754,9 @@ window.muatNaikJadual = async (jenis, input) => {
       r.onload = () => ok(r.result.split(',')[1]); r.onerror = gagal;
       r.readAsDataURL(blob);
     });
-    const d = await api({ action: 'jadual', jenis, mime: blob.type, data });
-    jadual[jenis] = d.jadual; kemasJadual();
-    mesej(`Jadual ${JENIS_JADUAL[jenis]} dikemas kini`);
+    const d = await api({ action: 'jadual', mime: blob.type, data });
+    jadual = d.jadual; kemasJadual();
+    mesej('Jadual dikemas kini');
   } catch (e) { mesej(e.message || 'Gagal muat naik', true); }
 };
 

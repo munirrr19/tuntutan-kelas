@@ -25,7 +25,22 @@ Dalam tab **Tetapan** di Sheet (lajur `kunci` dan `nilai`):
 | Kunci | Contoh | Maksud |
 |---|---|---|
 | `kadar` | `30` | Kadar RM sejam. Jika tiada, RM30 |
+| `jadual` | (diisi app) | ID fail jadual semasa dan tarikh muat naik. Jangan ubah manual |
 | `intensif` | `7` | Bilangan kelas intensif (Kelas 1 hingga Kelas 7) untuk musim cuti. Kosongkan untuk menutup. Rekod lama tidak terjejas |
+
+## Jadual guru bertugas (setiap bulan)
+Guru nampak butang **Jadual** (ikon kalendar) di header. Bila ditekan, jadual dipaparkan dalam tetingkap, dengan pautan **Buka penuh**.
+
+**Untuk SU Quran (setiap bulan):**
+1. Buka link peribadi SU (SU mesti admin: lajur `admin` = `ya` dalam tab Guru).
+2. Tekan tab **Admin**.
+3. Dalam kad **Jadual kelas bulanan**, tekan **Muat naik jadual baru** dan pilih PDF atau gambar.
+4. Siap. Fail baru menggantikan yang lama serta-merta.
+
+Nota:
+- Satu jadual sahaja pada satu masa. Fail lama dihantar ke Trash Drive pemilik Sheet (boleh dipulihkan dalam 30 hari).
+- Gambar dari kamera dikecilkan automatik. Saiz maksimum 10MB.
+- Fail disimpan dalam folder Drive **Jadual Kelas (e-Tuntutan)** milik pemilik Sheet, dikongsi sebagai *sesiapa yang ada link boleh lihat* supaya guru boleh melihatnya tanpa log masuk Google.
 
 ## Tab Admin
 - Senarai semua guru dengan jumlah jam dan RM bagi bulan dipilih.

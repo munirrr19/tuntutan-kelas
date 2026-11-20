@@ -2,6 +2,9 @@
 
 Butiran penuh: `git log`.
 
+## 2026-11-20
+- Butang **Jadual** di header: memaparkan jadual bulanan (PDF/gambar). SU Quran muat naik dari tab Admin; fail baru menggantikan yang lama.
+
 ## 2026-11-12
 - Dokumentasi dalam `docs/`: panduan guru, admin, serahan, pembangunan dan struktur data. README diringkaskan.
 
