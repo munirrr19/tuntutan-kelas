@@ -8,6 +8,7 @@ const TETAPAN = 'Tetapan';
 const SELESAI = 'Selesai'; // guru | bulan (yyyy-mm) | masa: bulan yang guru tanda siap untuk dituntut
 const LAJUR = ['id', 'tarikh', 'tingkatan', 'mula', 'tamat', 'jam', 'catatan', 'guru'];
 const LAJUR_GURU = ['id', 'nama', 'kp', 'telefon', 'token', 'admin', 'link'];
+const JADUAL = ['malam', 'hujung']; // jadual bulanan: fail Drive, id disimpan dalam Tetapan sebagai jadual_<jenis> = id|tarikh
 
 function onOpen() {
   SpreadsheetApp.getUi().createMenu('Tuntutan Kelas').addItem('Jana token & link guru', 'janaLink').addToUi();
@@ -89,6 +90,21 @@ function cariGuru_(token) {
   return { baris: i + 2, ...profil_(semua[i]), admin: String(semua[i][5]).trim().toLowerCase() === 'ya' };
 }
 
+function jadual_(t) {
+  const o = {};
+  JADUAL.forEach(k => { const [id, masa] = String(t['jadual_' + k] || '').split('|'); if (id) o[k] = { id, masa }; });
+  return o;
+}
+
+function folderJadual_() {
+  const props = PropertiesService.getScriptProperties();
+  try { return DriveApp.getFolderById(props.getProperty('FOLDER_JADUAL')); } catch (e) {
+    const f = DriveApp.createFolder('Jadual Kelas (e-Tuntutan)');
+    props.setProperty('FOLDER_JADUAL', f.getId());
+    return f;
+  }
+}
+
 function jawab_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
@@ -111,7 +127,7 @@ function doGet(e) {
       .filter(r => r[0] && (guru.admin || String(r[0]) === guru.id))
       .map(r => ({ guru: String(r[0]), bulan: String(r[1]), masa: String(r[2]) }));
     // intensif: bilangan "Kelas 1..n" untuk musim cuti; kosongkan bila tamat
-    const res = { ok: true, guru, kadar: Number(t.kadar) || 30, intensif: Number(t.intensif) || 0, entri, selesai };
+    const res = { ok: true, guru, kadar: Number(t.kadar) || 30, intensif: Number(t.intensif) || 0, entri, selesai, jadual: jadual_(t) };
     if (guru.admin) {
       res.semuaGuru = baris_(GURU).filter(r => r[0]).map(profil_);
     }
@@ -121,7 +137,7 @@ function doGet(e) {
   }
 }
 
-// POST (body JSON sebagai text/plain): simpan | padam | profil
+// POST (body JSON sebagai text/plain): simpan | padam | profil | selesai | jadual
 function doPost(e) {
   const lock = LockService.getScriptLock();
   // Hujung bulan ramai guru simpan serentak; jika masih sibuk, ralat ini bukan JSON dan telefon akan cuba semula
@@ -164,6 +180,21 @@ function doPost(e) {
       if (b.batal) { if (i > 0) sh.deleteRow(i + 1); }
       else if (i < 0) sh.getRange(sh.getLastRow() + 1, 1, 1, 3).setNumberFormat('@')
         .setValues([[guru.id, b.bulan, Utilities.formatDate(new Date(), 'Asia/Kuala_Lumpur', 'yyyy-MM-dd HH:mm')]]);
+    } else if (b.action === 'jadual') {
+      if (!guru.admin) throw new Error('Admin sahaja');
+      if (!JADUAL.includes(b.jenis) || !/^(image\/(jpeg|png|webp)|application\/pdf)$/.test(b.mime)) throw new Error('Hanya gambar atau PDF');
+      const nama = 'Jadual ' + b.jenis + ' ' + Utilities.formatDate(new Date(), 'Asia/Kuala_Lumpur', 'yyyy-MM-dd');
+      const fail = folderJadual_().createFile(Utilities.newBlob(Utilities.base64Decode(b.data), b.mime, nama));
+      fail.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      const sh = ss.getSheetByName(TETAPAN), t = baris_(TETAPAN), kunciT = 'jadual_' + b.jenis;
+      const i = t.findIndex(r => r[0] === kunciT);
+      const masa = Utilities.formatDate(new Date(), 'Asia/Kuala_Lumpur', 'yyyy-MM-dd');
+      if (i >= 0) {
+        // Buang fail lama ke Trash (boleh dipulihkan dalam 30 hari)
+        try { DriveApp.getFileById(String(t[i][1]).split('|')[0]).setTrashed(true); } catch (e) {}
+        sh.getRange(i + 2, 2).setValue(fail.getId() + '|' + masa);
+      } else sh.getRange(sh.getLastRow() + 1, 1, 1, 2).setNumberFormat('@').setValues([[kunciT, fail.getId() + '|' + masa]]);
+      return jawab_({ ok: true, jadual: { id: fail.getId(), masa } });
     } else {
       throw new Error('Tindakan tidak dikenali');
     }
