@@ -124,7 +124,7 @@
     nav button svg { width: 22px; height: 22px; }
     nav button.aktif { background: var(--hijau-muda); }
     main { padding-bottom: calc(96px + env(safe-area-inset-bottom)) !important; }
-    .mesej { bottom: calc(86px + env(safe-area-inset-bottom)) !important; }
+    .mesej { top: calc(76px + env(safe-area-inset-top)) !important; }
   }
 
   main { max-width: 620px; margin: 0 auto; padding: 14px; }
@@ -295,13 +295,19 @@
 
   /* Toast & Modal */
   .mesej {
-    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+    position: fixed; left: 50%; top: 122px; transform: translateX(-50%);
     background: #111827; color: #fff; padding: 10px 16px; border-radius: 999px;
     display: none; align-items: center; gap: 8px; z-index: 40; max-width: 90vw;
     font-size: .84rem; font-weight: 600; box-shadow: 0 10px 25px rgba(0,0,0,.22);
   }
   .mesej-dot { width: 8px; height: 8px; border-radius: 50%; background: #34d399; flex: none; }
   .mesej.err .mesej-dot { background: #f87171; }
+  .mesej-tutup {
+    display: none; flex: none; min-height: 44px; min-width: 64px; padding: 0 14px; border: 0; border-radius: 999px;
+    background: rgba(255,255,255,.18); color: #fff; font: inherit; font-size: .8rem; font-weight: 600; cursor: pointer;
+  }
+  .mesej.err { padding-right: 6px; }
+  .mesej.err .mesej-tutup { display: block; }
 
   .modal-latar {
     position: fixed; inset: 0; background: rgba(0,0,0,.45); backdrop-filter: blur(2px);
@@ -521,7 +527,7 @@
   </section>
 </main>
 
-<div class="mesej" id="mesej" role="status" aria-live="polite"><span class="mesej-dot"></span><span id="mesejTeks"></span></div>
+<div class="mesej" id="mesej" role="status" aria-live="polite"><span class="mesej-dot"></span><span id="mesejTeks"></span><button type="button" class="mesej-tutup" id="mesejTutup">Tutup</button></div>
 
 <div class="modal-latar" id="modalLatar" role="dialog" aria-modal="true" aria-labelledby="modalTajuk">
   <div class="modal-kotak">
@@ -585,13 +591,17 @@ console.assert(pecah([1,2,3], 2).length === 2 && pecah([], 20).length === 1, 'pe
 const bertindih = (a, b) => minit(a.mula) < minit(b.tamat) && minit(b.mula) < minit(a.tamat);
 console.assert(bertindih({ mula: '08:00', tamat: '10:00' }, { mula: '09:30', tamat: '11:00' }) && !bertindih({ mula: '08:00', tamat: '10:00' }, { mula: '10:00', tamat: '12:00' }), 'bertindih');
 
+// Mesej biasa hilang sendiri; mesej ralat kekal sehingga guru tekan Tutup
 function mesej(teks, ralat = false) {
   const m = $('mesej');
   $('mesejTeks').textContent = teks;
   m.classList.toggle('err', ralat);
+  m.setAttribute('role', ralat ? 'alert' : 'status');
   m.style.display = 'flex';
-  clearTimeout(mesej.t); mesej.t = setTimeout(() => m.style.display = 'none', 2600);
+  clearTimeout(mesej.t);
+  if (!ralat) mesej.t = setTimeout(() => m.style.display = 'none', 2600);
 }
+$('mesejTutup').onclick = () => $('mesej').style.display = 'none';
 function sahkan(tajuk, teks, labelTerus = 'Teruskan', bahaya = false) {
   return new Promise(resolve => {
     const asal = document.activeElement;
