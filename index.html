@@ -335,9 +335,12 @@
   .modal-latar {
     position: fixed; inset: 0; background: rgba(0,0,0,.45); backdrop-filter: blur(2px);
     display: none; align-items: flex-end; justify-content: center; padding: 14px; z-index: 50;
+    /* <dialog>: buang gaya lalai pelayar supaya kekal lapisan penuh skrin */
+    margin: 0; border: 0; width: 100%; height: 100%; max-width: none; max-height: none; color: inherit;
   }
+  .modal-latar::backdrop { background: transparent; }
   @media (min-width: 640px) { .modal-latar { align-items: center; } }
-  .modal-latar.buka { display: flex; }
+  .modal-latar[open] { display: flex; }
   .modal-kotak {
     width: 100%; max-width: 400px; background: #fff; border-radius: 18px;
     padding: 18px; box-shadow: 0 20px 45px rgba(0,0,0,.25);
@@ -553,7 +556,7 @@
 
 <div class="mesej" id="mesej" role="status" aria-live="polite"><span class="mesej-dot"></span><span id="mesejTeks"></span><button type="button" class="mesej-tutup" id="mesejTutup">Tutup</button></div>
 
-<div class="modal-latar" id="modalLatar" role="dialog" aria-modal="true" aria-labelledby="modalTajuk">
+<dialog class="modal-latar" id="modalLatar" aria-labelledby="modalTajuk">
   <div class="modal-kotak">
     <h3 id="modalTajuk">Sahkan</h3>
     <p id="modalTeks"></p>
@@ -562,15 +565,15 @@
       <button type="button" class="btn utama" style="margin-top:0" id="modalTerus">Teruskan</button>
     </div>
   </div>
-</div>
+</dialog>
 
-<div class="modal-latar" id="jadualLatar" role="dialog" aria-modal="true" aria-labelledby="jadualTajuk">
+<dialog class="modal-latar" id="jadualLatar" aria-labelledby="jadualTajuk">
   <div class="modal-kotak">
     <div class="label-baris" style="margin-top:0"><h3 id="jadualTajuk" style="margin:0">Jadual Kelas</h3><a class="label-petunjuk" id="jadualPenuh" target="_blank" rel="noopener">Buka penuh ↗</a></div>
     <iframe id="jadualBingkai" title="Jadual kelas"></iframe>
-    <button type="button" class="btn" style="width:100%;margin-top:10px" onclick="$('jadualLatar').classList.remove('buka')">Tutup</button>
+    <button type="button" class="btn" style="width:100%;margin-top:10px" onclick="$('jadualLatar').close()">Tutup</button>
   </div>
-</div>
+</dialog>
 
 <script>
 const BULAN = ['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','September','Oktober','November','Disember'];
@@ -635,16 +638,17 @@ function sahkan(tajuk, teks, labelTerus = 'Teruskan', bahaya = false) {
     btn.textContent = labelTerus;
     btn.className = bahaya ? 'btn bahaya' : 'btn utama';
     btn.style.marginTop = '0';
-    $('modalLatar').classList.add('buka');
+    const dlg = $('modalLatar');
+    if (dlg.open) dlg.close();
+    dlg.showModal(); // perangkap fokus + latar belakang tak boleh diklik
     $('modalBatal').focus();
-    const onKey = e => { if (e.key === 'Escape') tutup(false); };
     const tutup = ok => {
-      $('modalLatar').classList.remove('buka');
-      removeEventListener('keydown', onKey);
+      dlg.oncancel = null;
+      dlg.close();
       if (asal && asal.focus) asal.focus();
       resolve(ok);
     };
-    addEventListener('keydown', onKey);
+    dlg.oncancel = e => { e.preventDefault(); tutup(false); }; // Escape
     $('modalBatal').onclick = () => tutup(false);
     $('modalLatar').onclick = e => { if (e.target === $('modalLatar')) tutup(false); };
     btn.onclick = () => tutup(true);
@@ -774,9 +778,9 @@ function kemasJadual() {
 window.bukaJadual = () => {
   $('jadualBingkai').src = `https://drive.google.com/file/d/${jadual.id}/preview`;
   $('jadualPenuh').href = `https://drive.google.com/file/d/${jadual.id}/view`;
-  $('jadualLatar').classList.add('buka');
+  $('jadualLatar').showModal();
 };
-$('jadualLatar').onclick = e => { if (e.target === $('jadualLatar')) $('jadualLatar').classList.remove('buka'); };
+$('jadualLatar').onclick = e => { if (e.target === $('jadualLatar')) $('jadualLatar').close(); };
 // Gambar kamera telefon (5-10MB) dikecilkan dulu supaya muat naik ke Apps Script cepat
 async function kecilkan(fail) {
   const img = await createImageBitmap(fail), s = Math.min(1, 2000 / Math.max(img.width, img.height));
