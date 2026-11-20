@@ -228,6 +228,11 @@
     background: #d97706; color: #fff; font: inherit; font-size: .75rem; font-weight: 600; cursor: pointer;
   }
 
+  .tiada-token h2 { font-size: 1.05rem; margin: 0 0 6px; }
+  .tiada-token p { margin: 0 0 12px; font-size: .9rem; color: #374151; line-height: 1.5; }
+  .tiada-token ol { margin: 0; padding-left: 20px; font-size: .9rem; line-height: 1.6; }
+  .tiada-token li { margin-bottom: 6px; }
+
   /* Pemilih bulan */
   .bulan { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
   .bulan-kotak {
@@ -403,8 +408,14 @@
 
 <main>
   <section id="tab-catat" class="aktif">
-    <div id="bannerToken" class="banner-amaran" style="display:none">
-      <span>Pautan peribadi diperlukan. Sila buka link peribadi anda daripada admin.</span>
+    <div id="bannerToken" class="kad tiada-token" hidden>
+      <h2>Buka pautan peribadi anda dahulu</h2>
+      <p>Setiap guru ada pautan sendiri. Pautan itu memberitahu sistem siapa anda, jadi rekod tidak bercampur dengan guru lain.</p>
+      <ol>
+        <li>Minta pautan peribadi daripada Setiausaha Al-Quran (admin).</li>
+        <li>Buka pautan itu di telefon ini. Ia akan diingat secara automatik.</li>
+        <li>Lepas itu, buka sistem ini seperti biasa untuk mencatat kelas.</li>
+      </ol>
     </div>
     <div id="bannerKunci" class="banner-amaran" style="display:none">
       <span>Bulan ini sudah ditanda <b>SELESAI</b>. Buka semula di tab Borang untuk tambah atau ubah.</span>
@@ -685,7 +696,7 @@ async function muat() {
   } catch (e) {
     sedangMuat = false;
     if (!c) { $('namaHeader').textContent = 'MTAQ Pulai Chondong'; lukis(); }
-    mesej(e.message, true);
+    if (token()) mesej(e.message, true); // tanpa pautan, kad arahan sudah menerangkan
   } finally {
     menyegar = false; kemasSync();
   }
@@ -889,7 +900,10 @@ function lukis() {
   const senarai = entriBulan(guru.id);
   const jumlahJam = jumlah(senarai);
   const s = statusSelesai(guru.id);
-  $('bannerToken').style.display = token() ? 'none' : 'flex';
+  // Tanpa pautan peribadi: hanya arahan; borang, Borang dan Tetapan disembunyikan
+  $('bannerToken').hidden = !!token();
+  $('fCatat').hidden = !token();
+  for (const t of ['borang', 'tetapan']) document.querySelector(`nav [data-tab=${t}]`).hidden = !token();
   kemasBannerKunci();
 
   $('kpiSenarai').innerHTML = `<div class="kpi-kad tabular">
