@@ -27,12 +27,6 @@ function setup() {
   guru.getRange(1, 1, 1, LAJUR_GURU.length).setValues([LAJUR_GURU]);
   guru.getRange('A:G').setNumberFormat('@');
 
-  // Folder Drive untuk jadual bulanan (PDF/gambar). SU Quran hanya letak fail baharu di sini.
-  if (!baris_(TETAPAN).some(r => r[0] === 'folder_jadual')) {
-    const folder = DriveApp.createFolder('Jadual Kelas (e-Tuntutan)');
-    tetapan.getRange(tetapan.getLastRow() + 1, 1, 1, 2).setNumberFormat('@').setValues([['folder_jadual', folder.getId()]]);
-  }
-
   // Migrasi dari versi seorang guru: pemilik token lama menjadi admin pertama
   const props = PropertiesService.getScriptProperties();
   const lama = props.getProperty('TOKEN');
@@ -49,6 +43,7 @@ function setup() {
     }
     props.deleteProperty('TOKEN');
   }
+  setupJadual(); // Jadual.gs
   janaLink();
 }
 
@@ -95,35 +90,6 @@ function cariGuru_(token) {
   return { baris: i + 2, ...profil_(semua[i]), admin: String(semua[i][5]).trim().toLowerCase() === 'ya' };
 }
 
-// Fail jadual paling baharu (PDF atau gambar) dalam folder_jadual. Disimpan dalam cache 5 minit
-// supaya DriveApp tidak dipanggil setiap kali guru buka app.
-function jadual_(folderId) {
-  if (!folderId) return null;
-  const cache = CacheService.getScriptCache(), kunciCache = 'jadual_' + folderId;
-  const c = cache.get(kunciCache);
-  if (c) return JSON.parse(c);
-  let baru = null;
-  try {
-    const fail = DriveApp.getFolderById(folderId).getFiles();
-    while (fail.hasNext()) {
-      const f = fail.next(), jenis = f.getMimeType();
-      if ((jenis === MimeType.PDF || jenis.startsWith('image/')) && (!baru || f.getDateCreated() > baru.getDateCreated())) baru = f;
-    }
-  } catch (err) {
-    return null;
-  }
-  let hasil = null;
-  if (baru) {
-    // Guru tidak log masuk Google: fail mesti boleh dilihat oleh sesiapa yang ada link
-    try {
-      if (baru.getSharingAccess() !== DriveApp.Access.ANYONE_WITH_LINK) baru.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-    } catch (err) {}
-    hasil = { id: baru.getId(), nama: baru.getName().replace(/\.[^.]+$/, ''), pdf: baru.getMimeType() === MimeType.PDF };
-  }
-  cache.put(kunciCache, JSON.stringify(hasil), 300);
-  return hasil;
-}
-
 function jawab_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
@@ -146,7 +112,7 @@ function doGet(e) {
       .filter(r => r[0] && (guru.admin || String(r[0]) === guru.id))
       .map(r => ({ guru: String(r[0]), bulan: String(r[1]), masa: String(r[2]) }));
     // intensif: bilangan "Kelas 1..n" untuk musim cuti; kosongkan bila tamat
-    const res = { ok: true, guru, kadar: Number(t.kadar) || 30, intensif: Number(t.intensif) || 0, entri, selesai, jadual: jadual_(t.folder_jadual) };
+    const res = { ok: true, guru, kadar: Number(t.kadar) || 30, intensif: Number(t.intensif) || 0, entri, selesai, jadual: jadual_(t.folder_jadual) }; // jadual_: Jadual.gs
     if (guru.admin) {
       res.semuaGuru = baris_(GURU).filter(r => r[0]).map(profil_);
     }

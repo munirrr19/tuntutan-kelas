@@ -43,7 +43,7 @@ Nota:
 - Tersilap upload? Padam fail itu; app kembali memaparkan fail sebelumnya.
 - Fail dikongsi sebagai *sesiapa yang ada link boleh lihat* (dibuat automatik) supaya guru boleh melihatnya tanpa log masuk Google.
 
-**Sediakan sekali sahaja (pemilik Sheet):** selepas `Code.gs` dikemas kini dan **setup** dijalankan, folder ini dicipta di Drive pemilik dan ID-nya disimpan dalam tab Tetapan (`folder_jadual`). Klik kanan folder → **Share** → tambah emel SU Quran sebagai **Editor**.
+**Sediakan sekali sahaja (pemilik Sheet):** tambah fail `Jadual.gs` dalam Apps Script dan jalankan **setupJadual** (atau **setup**). Folder ini dicipta di Drive pemilik dan ID-nya disimpan dalam tab Tetapan (`folder_jadual`). Klik kanan folder → **Share** → tambah emel SU Quran sebagai **Editor**.
 
 ## Tab Admin
 - Senarai semua guru dengan jumlah jam dan RM bagi bulan dipilih.
