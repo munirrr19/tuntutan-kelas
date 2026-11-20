@@ -5,7 +5,6 @@
 ```
 index.html       seluruh aplikasi (HTML + CSS + JS dalam satu fail), dihos di GitHub Pages
 Code.gs          pelayan Google Apps Script, terikat pada Google Sheet
-Jadual.gs        jadual guru bertugas dari folder Drive (fail kedua dalam projek Apps Script yang sama)
 manifest.json    PWA (Add to Home screen)
 *.png            logo dan ikon
 docs/            dokumentasi
@@ -35,7 +34,7 @@ Telefon guru ──HTTPS──▶ GitHub Pages (index.html)
 4. Guru mungkin perlu tutup dan buka semula app.
 
 ## Kemas kini `Code.gs`
-1. Buka Google Sheet → **Extensions → Apps Script**. Tampal kod baharu dan simpan. `Jadual.gs` ialah fail berasingan dalam projek yang sama (**+ → Script**).
+1. Buka Google Sheet → **Extensions → Apps Script**. Tampal kod baharu dan simpan.
 2. Jalankan **setup** sekali (selamat dijalankan berulang kali: mencipta tab dan tajuk yang belum ada).
 3. **Deploy → Manage deployments → Edit (ikon pensel) → Version: New version → Deploy.** URL web app kekal sama.
 
