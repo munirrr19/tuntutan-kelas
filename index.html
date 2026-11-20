@@ -15,12 +15,11 @@
   :root {
     --hijau: #0f6b4f;
     --hijau-gelap: #094a36;
-    --hijau-grad: linear-gradient(135deg, #0f6b4f, #094a36);
     --hijau-muda: #e7f5ef;
     --hijau-teks: #065f46;
     --latar: #f4f6f8;
     --kad: #ffffff;
-    --kelabu: #6b7280;
+    --kelabu: #5b6460;
     --garis: #e5e7eb;
     --merah: #b42318;
     --merah-muda: #fef2f2;
@@ -51,7 +50,7 @@
 
   /* Header */
   header {
-    background: linear-gradient(180deg, #0f6b4f 0%, #094a36 100%);
+    background: var(--hijau);
     color: #fff;
     padding: calc(14px + env(safe-area-inset-top)) 16px 14px;
     min-height: 68px;
@@ -65,7 +64,7 @@
   }
   header img { height: 40px; width: auto; flex: none; }
   .header-teks { flex: 1; min-width: 0; }
-  header h1 { font-size: 1rem; margin: 0; line-height: 1.2; }
+  header h1 { font-size: 1rem; margin: 0; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .header-sub { font-size: .76rem; color: rgba(255,255,255,.88); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
   .sync-pill {
     display: inline-flex; align-items: center; gap: 5px;
@@ -198,7 +197,7 @@
     cursor: pointer; transition: all .15s; white-space: nowrap;
   }
   .chip:hover { border-color: var(--hijau); color: var(--hijau); }
-  .chip.aktif { background: var(--hijau-grad); color: #fff; border-color: transparent; box-shadow: 0 2px 6px rgba(15,107,79,.22); }
+  .chip.aktif { background: var(--hijau); color: #fff; border-color: var(--hijau); }
   .chip-kecil { position: relative; z-index: 1; padding: 6px 10px; font-size: .74rem; border-radius: 8px; background: var(--hijau-muda); color: var(--hijau); border: 1px solid rgba(15,107,79,.2); font-weight: 600; cursor: pointer; }
 
   /* Masa & Stepper */
@@ -219,10 +218,10 @@
   }
   .btn:active { transform: scale(.99); }
   button.utama {
-    background: var(--hijau-grad); color: #fff; width: 100%; margin-top: 14px; padding: 12px;
-    border: 0; box-shadow: 0 2px 8px rgba(15,107,79,.22);
+    background: var(--hijau); color: #fff; width: 100%; margin-top: 14px; padding: 12px;
+    border: 0;
   }
-  button.utama:hover { filter: brightness(.95); }
+  button.utama:hover, .btn-cetak:hover { background: var(--hijau-gelap); }
   button.bahaya { border-color: #fecaca; background: var(--merah-muda); color: var(--merah); }
   button:disabled { opacity: .45; cursor: not-allowed; }
 
@@ -258,8 +257,7 @@
   }
   .btn-cetak {
     height: 44px; padding: 0 14px; display: inline-flex; align-items: center; justify-content: center;
-    white-space: nowrap; flex: none; background: var(--hijau-grad); color: #fff; border: 0;
-    box-shadow: 0 2px 6px rgba(15,107,79,.2);
+    white-space: nowrap; flex: none; background: var(--hijau); color: #fff; border: 0;
   }
 
   /* Telefon kecil: butang cetak turun ke baris sendiri supaya nama bulan muat */
@@ -270,14 +268,13 @@
 
   /* Kad KPI */
   .kpi-kad {
-    background: var(--hijau-grad);
+    background: var(--hijau);
     color: #fff; border-radius: 14px; padding: 14px 16px; margin-bottom: 12px;
-    box-shadow: 0 6px 18px rgba(15,107,79,.22);
   }
   .kpi-atas { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: .78rem; color: rgba(255,255,255,.88); }
   .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
   .kpi-kotak { background: rgba(255,255,255,.12); border-radius: 10px; padding: 8px 4px; }
-  .kpi-kotak small { display: block; font-size: .7rem; color: rgba(255,255,255,.82); }
+  .kpi-kotak small { display: block; font-size: .72rem; color: #fff; }
   .kpi-kotak b { font-size: 1rem; }
 
   .lencana { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: .72rem; font-weight: 700; }
@@ -298,10 +295,11 @@
   .item .btn { padding: 5px 12px; font-size: .78rem; border-radius: 8px; }
   .item .btn-cetak { height: 44px; font-size: .78rem; }
   .kosong { color: var(--kelabu); text-align: center; padding: 24px 0; font-size: .9rem; }
+  .kosong p { margin: 0 0 12px; }
 
   /* Admin Progress & Senarai Padat */
   .progress-wrap { width: 100%; height: 8px; background: #e5e7eb; border-radius: 999px; overflow: hidden; margin: 8px 0 12px; }
-  .progress-bar { height: 100%; background: var(--hijau-grad); border-radius: 999px; transition: width .3s ease; }
+  .progress-bar { height: 100%; background: var(--hijau); border-radius: 999px; transition: width .3s ease; }
   #ringkasAdmin .item { padding: 8px 0; gap: 8px; }
   #ringkasAdmin .item-atas b { font-size: .82rem; line-height: 1.25; }
   #ringkasAdmin .item small { font-size: .73rem; margin-top: 2px; }
@@ -411,7 +409,7 @@
   </button>
   <button class="sync-pill" id="syncPill" onclick="hantar()" title="Status penyegerakan">
     <span class="sync-dot"></span>
-    <span id="syncTeks">Disegerak</span>
+    <span id="syncTeks">Tersimpan</span>
   </button>
 </header>
 
@@ -506,7 +504,7 @@
     <div class="bulan">
       <button type="button" class="bulan-nav" onclick="anjakBulan(-1)" aria-label="Bulan sebelum">‹</button>
       <div class="bulan-kotak"><span class="bulan-papar"></span><input type="month" class="pilihBulan" aria-label="Bulan"></div>
-      <button type="button" class="bulan-nav" onclick="anjakBulan(1)" aria-label="Bulan seterus">›</button>
+      <button type="button" class="bulan-nav" onclick="anjakBulan(1)" aria-label="Bulan seterusnya">›</button>
     </div>
     <div id="kpiSenarai"></div>
     <div class="kad" id="senarai"></div>
@@ -516,7 +514,7 @@
     <div class="bulan tiada-cetak">
       <button type="button" class="bulan-nav" onclick="anjakBulan(-1)" aria-label="Bulan sebelum">‹</button>
       <div class="bulan-kotak"><span class="bulan-papar"></span><input type="month" class="pilihBulan" aria-label="Bulan"></div>
-      <button type="button" class="bulan-nav" onclick="anjakBulan(1)" aria-label="Bulan seterus">›</button>
+      <button type="button" class="bulan-nav" onclick="anjakBulan(1)" aria-label="Bulan seterusnya">›</button>
       <button class="btn btn-cetak" onclick="print()">Cetak / PDF</button>
     </div>
     <div class="kad tiada-cetak" id="kotakSelesai"></div>
@@ -536,12 +534,12 @@
     <div class="bulan tiada-cetak">
       <button type="button" class="bulan-nav" onclick="anjakBulan(-1)" aria-label="Bulan sebelum">‹</button>
       <div class="bulan-kotak"><span class="bulan-papar"></span><input type="month" class="pilihBulan" aria-label="Bulan"></div>
-      <button type="button" class="bulan-nav" onclick="anjakBulan(1)" aria-label="Bulan seterus">›</button>
+      <button type="button" class="bulan-nav" onclick="anjakBulan(1)" aria-label="Bulan seterusnya">›</button>
       <button class="btn btn-cetak" onclick="cetakGuru(null)">Cetak semua</button>
     </div>
     <div class="pantas tiada-cetak" style="margin:0 0 12px">
       <button class="btn" onclick="cetakRingkasan()">Senarai penerima imbuhan</button>
-      <button class="btn" onclick="suratClaim()">Surat claim (PDF)</button>
+      <button class="btn" onclick="suratClaim()">Surat tuntutan (PDF)</button>
     </div>
     <div class="kad tiada-cetak">
       <b>Jadual kelas bulanan</b>
@@ -657,7 +655,7 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '
 function kemasSync() {
   const pill = $('syncPill'), q = gilir().length;
   pill.className = 'sync-pill' + (!navigator.onLine ? ' offline' : (menghantar || q || menyegar) ? ' sibuk' : '');
-  $('syncTeks').textContent = !navigator.onLine ? 'Luar talian' : (menghantar || q) ? `Menghantar (${q || 1})` : menyegar ? 'Menyegar...' : 'Disegerak';
+  $('syncTeks').textContent = !navigator.onLine ? 'Luar talian' : (menghantar || q) ? `Menghantar (${q || 1})` : menyegar ? 'Memuat...' : 'Tersimpan';
 }
 
 // ---- API (Google Apps Script) ----
@@ -666,7 +664,7 @@ const token = () => localStorage.getItem('token') || '';
 if (kunci && kunci !== token() && (!token() || confirm('Tukar ke akaun lain?'))) localStorage.setItem('token', kunci);
 
 async function api(body) {
-  if (!token()) throw new Error('Sila buka link peribadi anda daripada admin');
+  if (!token()) throw new Error('Sila buka pautan peribadi anda daripada admin');
   const res = body
     ? await fetch(API, { method: 'POST', body: JSON.stringify({ ...body, token: token() }) })
     : await fetch(API + '?token=' + encodeURIComponent(token()) + '&tahun=' + tahunDimuat);
@@ -938,6 +936,7 @@ function lukis() {
   const s = statusSelesai(guru.id);
   $('bannerToken').hidden = !!token();
   $('fCatat').hidden = !token();
+  for (const t of ['borang', 'tetapan']) document.querySelector(`nav [data-tab=${t}]`).hidden = !token();
   kemasBannerKunci();
 
   $('kpiSenarai').innerHTML = `<div class="kpi-kad tabular">
@@ -950,7 +949,7 @@ function lukis() {
   </div>`;
 
   if (!token()) {
-    $('senarai').innerHTML = '<div class="kosong">Pautan peribadi diperlukan. Sila buka link peribadi anda daripada admin.</div>';
+    $('senarai').innerHTML = '<div class="kosong">Pautan peribadi diperlukan. Sila buka pautan peribadi anda daripada admin.</div>';
   } else if (sedangMuat) {
     $('senarai').innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
   } else {
@@ -962,14 +961,15 @@ function lukis() {
           <small class="tabular"><b>${jamTeks(x.jam)} jam</b>${x.catatan ? ' · ' + esc(x.catatan) : ''}</small></div>
           ${s ? '' : `<div class="item-tindakan"><button class="btn" onclick="ubah('${x.id}')">Ubah</button>
           <button class="btn bahaya" onclick="padam('${x.id}')">Padam</button></div>`}</div>`).join('')
-      : '<div class="kosong">Tiada rekod untuk bulan ini</div>');
+      : `<div class="kosong"><p>Tiada rekod untuk ${namaBulan()}.</p><button type="button" class="btn utama" style="width:auto;margin:0;padding:10px 20px" onclick="tukarTab('catat')">+ Catat kelas</button></div>`);
   }
 
   $('kotakSelesai').innerHTML = s
     ? `<div class="ringkas" style="margin:0">${teksSelesai(s)}</div>
        <button class="btn" style="width:100%;margin-top:8px" onclick="tandaSelesai(true)">Buka semula untuk ubah</button>`
     : `<small style="color:var(--kelabu)">Semak borang di bawah. Bila semua kelas ${namaBulan()} sudah diisi, tekan SELESAI supaya Setiausaha boleh proses tuntutan.</small>
-       <button class="btn utama" ${senarai.length ? '' : 'disabled'} onclick="tandaSelesai(false)">SELESAI</button>`;
+       <button class="btn utama" ${senarai.length ? '' : 'disabled aria-describedby="sebabLumpuh"'} onclick="tandaSelesai(false)">SELESAI</button>
+       ${senarai.length ? '' : `<p class="label-petunjuk" id="sebabLumpuh" style="margin:8px 0 0;text-align:center">Belum ada rekod untuk dihantar bagi ${namaBulan()}.</p>`}`;
 
   $('borang').innerHTML = borangHTML(guru, senarai);
   if (guru.admin) lukisAdmin();
@@ -1096,7 +1096,7 @@ function suratHTML() {
 window.suratClaim = () => {
   if (!senaraiBayaran().length) return mesej('Tiada rekod untuk bulan ini', true);
   const tajuk = document.title;
-  document.title = `Surat Claim ${namaBulan()}`;
+  document.title = `Surat Tuntutan ${namaBulan()}`;
   $('borangAdmin').innerHTML = suratHTML(); skalaBorang();
   print();
   document.title = tajuk; lukisAdmin();
