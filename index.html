@@ -230,6 +230,8 @@
   }
   .chip:hover { border-color: var(--hijau); color: var(--hijau); }
   .chip.aktif { background: var(--hijau); color: #fff; border-color: var(--hijau); }
+  .chip-lain { border-style: dashed; color: var(--kelabu); }
+  .chip-lain[aria-expanded=true] { border-style: solid; color: var(--hijau); border-color: var(--hijau); }
   .chip-kecil { position: relative; z-index: 1; padding: 6px 10px; font: inherit; font-size: var(--f-xs); border-radius: var(--r-kecil); background: var(--hijau-muda); color: var(--hijau); border: 1px solid transparent; font-weight: 600; cursor: pointer; }
   .chip-kecil::after { content: ""; position: absolute; inset: -9px -1px; }
 
@@ -496,12 +498,9 @@
         <input type="date" id="tarikh" required aria-label="Tarikh">
       </div>
 
-      <div class="label-baris">
-        <label for="tingkatan">Tingkatan</label>
-        <span class="label-petunjuk">Pilihan pantas</span>
-      </div>
-      <div class="chips" id="chipsTingkatan"></div>
-      <select id="tingkatan" required></select>
+      <label for="tingkatan" id="labelTingkatan">Tingkatan</label>
+      <div class="chips" id="chipsTingkatan" role="group" aria-labelledby="labelTingkatan"></div>
+      <select id="tingkatan" required hidden></select>
 
       <div class="label-baris">
         <label>Masa Mengajar</label>
@@ -872,10 +871,20 @@ function lukisChipsTingkatan() {
   kerap = kerap.filter(t => sediaAda.includes(t)).slice(0, 4);
   if (!kerap.length) kerap = sediaAda.slice(0, 4);
   const semasa = $('tingkatan').value;
-  $('chipsTingkatan').innerHTML = kerap.map(t => `<button type="button" class="chip${t === semasa ? ' aktif' : ''}" onclick="pilihTingkatan('${esc(t)}')">${esc(t)}</button>`).join('');
+  // Pilihan semasa sentiasa nampak sebagai chip aktif, walaupun bukan antara yang kerap
+  if (semasa && !kerap.includes(semasa)) kerap = [...kerap.slice(0, 3), semasa];
+  const buka = !$('tingkatan').hidden;
+  $('chipsTingkatan').innerHTML = kerap.map(t => `<button type="button" class="chip${t === semasa ? ' aktif' : ''}" aria-pressed="${t === semasa}" onclick="pilihTingkatan('${esc(t)}')">${esc(t)}</button>`).join('')
+    + `<button type="button" class="chip chip-lain" aria-expanded="${buka}" aria-controls="tingkatan" onclick="bukaSemuaTingkatan()">Lain-lain ▾</button>`;
 }
-window.pilihTingkatan = t => { $('tingkatan').value = t; lukisChipsTingkatan(); };
-$('tingkatan').onchange = lukisChipsTingkatan;
+window.pilihTingkatan = t => { $('tingkatan').value = t; $('tingkatan').hidden = true; lukisChipsTingkatan(); };
+window.bukaSemuaTingkatan = () => {
+  const sel = $('tingkatan');
+  sel.hidden = !sel.hidden;
+  lukisChipsTingkatan();
+  if (!sel.hidden) sel.focus();
+};
+$('tingkatan').onchange = () => { $('tingkatan').hidden = true; lukisChipsTingkatan(); };
 
 isiTingkatan(0);
 for (const id of ['mula', 'tamat']) $(id).innerHTML = PILIHAN_MASA.map(t => `<option value="${t}">${masaTeks(t)}</option>`).join('');
@@ -922,6 +931,7 @@ function resetCatat() {
   $('tarikh').value = new Date().toLocaleDateString('en-CA');
   $('tingkatan').value = localStorage.getItem('tingkatanAkhir') || TINGKATAN[0];
   if (!$('tingkatan').value) $('tingkatan').value = TINGKATAN[0];
+  $('tingkatan').hidden = true;
   $('mula').value = localStorage.getItem('mulaAkhir') || '08:00';
   $('catatan').value = '';
   $('btnSimpan').textContent = 'Simpan';
@@ -1178,6 +1188,7 @@ function borangHTML(profil, senarai) {
 window.ubah = id => {
   const x = entri.find(e => e.id === id);
   idUbah = id;
+  $('tingkatan').hidden = true;
   if (![...$('tingkatan').options].some(o => o.value === x.tingkatan)) $('tingkatan').add(new Option(x.tingkatan));
   for (const k of ['tarikh', 'tingkatan', 'mula', 'tamat', 'catatan']) $(k).value = x[k];
   $('btnSimpan').textContent = 'Kemas kini';
