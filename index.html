@@ -277,7 +277,7 @@
   .item-atas.sebaris b { white-space: nowrap; font-size: .88rem; }
   .tag-kelas { background: var(--hijau-muda); color: var(--hijau); font-size: .72rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; white-space: nowrap; flex: none; }
   .item small { color: var(--kelabu); display: block; margin-top: 3px; font-size: .8rem; }
-  .item-tindakan { display: flex; gap: 5px; flex: none; }
+  .item-tindakan { display: flex; gap: 10px; flex: none; }
   .item .btn { padding: 5px 9px; font-size: .75rem; border-radius: 8px; }
   .kosong { color: var(--kelabu); text-align: center; padding: 24px 0; font-size: .9rem; }
 
@@ -288,6 +288,20 @@
   #ringkasAdmin .item-atas b { font-size: .82rem; line-height: 1.25; }
   #ringkasAdmin .item small { font-size: .73rem; margin-top: 2px; }
   #ringkasAdmin .lencana { font-size: .66rem; padding: 2px 7px; }
+
+  /* Kawasan sentuh 44px. Saiz visual tidak berubah: lapisan ::after tak nampak
+     melebihi butang. Item padat (Ubah, Padam, Cetak) hanya dilebarkan menegak. */
+  .sync-pill, .chip, .chip-kecil, .btn, .bulan-nav { position: relative; }
+  .sync-pill::after, .chip::after, .chip-kecil::after, .btn::after, .bulan-nav::after { content: ""; position: absolute; }
+  .sync-pill::after { inset: -11px -4px; }
+  .chip::after, .chip-kecil::after { inset: -8px 0; }
+  .chip-kecil { z-index: 1; }
+  .btn::after { inset: -3px 0; }
+  .item .btn::after { inset: -9px 0; }
+  .bulan-nav::after { inset: -2px; }
+  /* Masa mula/tamat: select dilebarkan ke atas, kiri dan bawah (margin negatif) supaya sasaran
+     sentuh 44px; teks dan anak panah kekal di kedudukan asal */
+  .masa-baris select { position: relative; margin: -12px 0 -8px -10px; width: calc(100% + 10px); height: 44px; padding: 4px 0 0 10px; }
 
   /* Skeleton loading */
   .skel { height: 54px; border-radius: 10px; background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%); background-size: 200% 100%; animation: kilau 1.2s infinite; margin-bottom: 8px; }
