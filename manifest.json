@@ -2,8 +2,8 @@
   "name": "Sistem e-Tuntutan Mengajar Al-Quran",
   "short_name": "e-Tuntutan Al-Quran",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0f6b4f",
+  "background_color": "#f7f3ea",
+  "theme_color": "#0f5a3f",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }

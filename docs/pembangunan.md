@@ -7,6 +7,7 @@ index.html       seluruh aplikasi (HTML + CSS + JS dalam satu fail), dihos di Gi
 Code.gs          pelayan Google Apps Script, terikat pada Google Sheet
 manifest.json    PWA (Add to Home screen)
 *.png            logo dan ikon
+fonts/           fon dimuat sendiri (IBM Plex Sans, Amiri; subset woff2) + lesen OFL
 docs/            dokumentasi
 ```
 
@@ -44,6 +45,11 @@ Jika kod mula memakai perkhidmatan Google baharu, pemilik mesti menjalankan satu
 
 ## Konvensyen
 - Teks paparan dalam Bahasa Melayu.
+- **Reka bentuk:** guna token CSS di `:root` (`--hijau`, `--emas`, `--kertas`, `--dakwat`, `--f-xs`…`--f-xl`, `--r-kecil`, `--r`). Jangan tulis hex atau saiz fon terus.
+  - Warna daripada lambang maahad. `--emas` untuk garis/hiasan sahaja, bukan teks (kontras rendah).
+  - Fon: Amiri untuk tajuk, nama bulan dan jumlah RM; IBM Plex Sans untuk yang lain. Borang A4 kekal Arial/Times untuk cetakan.
+  - Motif: `.berkubah` + `LENGKUNG` (garis emas berkubah), `.bingkai` (dua garis emas bila SELESAI), corak bintang lapan di header.
+  - Baris Arab di header guna `fonts/amiri-arab-400.woff2` yang hanya ada glyph untuk teks itu. Jika teks Arab diubah, jana semula subset: `pyftsubset amiri-arabic-400-normal.woff2 --text="..." --flavor=woff2 --layout-features='*'`.
 - Semua sel Sheet diformat sebagai teks (`@`). Gunakan `setValues` (bukan `appendRow`) supaya format kekal.
 - Sifar di depan No KP dan telefon dipulihkan oleh `kp_` dan `telefon_` jika Sheet membuangnya.
 - **Jangan commit data guru.** `.gitignore` sudah mengecualikan `senarai_*.md`, `*.xlsx`, `*.csv` dan `*.pdf`. Repo ini **awam**.
