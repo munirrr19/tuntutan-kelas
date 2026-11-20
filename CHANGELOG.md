@@ -2,6 +2,9 @@
 
 Butiran penuh: `git log`.
 
+## 2026-11-20
+- Butang **Jadual Guru Bertugas** di tab Catat: memaparkan PDF/gambar terbaharu yang SU Quran upload ke folder Drive.
+
 ## 2026-11-12
 - Dokumentasi dalam `docs/`: panduan guru, admin, serahan, pembangunan dan struktur data. README diringkaskan.
 

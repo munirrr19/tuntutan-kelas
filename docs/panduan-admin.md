@@ -25,7 +25,25 @@ Dalam tab **Tetapan** di Sheet (lajur `kunci` dan `nilai`):
 | Kunci | Contoh | Maksud |
 |---|---|---|
 | `kadar` | `30` | Kadar RM sejam. Jika tiada, RM30 |
+| `folder_jadual` | (ID folder Drive) | Dicipta oleh **setup**. Folder tempat SU Quran upload jadual bulanan |
 | `intensif` | `7` | Bilangan kelas intensif (Kelas 1 hingga Kelas 7) untuk musim cuti. Kosongkan untuk menutup. Rekod lama tidak terjejas |
+
+## Jadual guru bertugas (setiap bulan)
+Guru nampak butang **Jadual Guru Bertugas** di atas tab Catat. Bila ditekan, jadual terus dipaparkan skrin penuh.
+
+**Untuk SU Quran (setiap bulan):**
+1. Buka app **Google Drive** di telefon atau komputer.
+2. Masuk folder **Jadual Kelas (e-Tuntutan)** (ada di bawah *Shared with me*).
+3. Tekan **+ → Upload** dan pilih PDF atau gambar jadual bulan baharu.
+4. Siap. Dalam masa 5 minit, app memaparkan fail **paling baharu**. Fail lama boleh dibiarkan sebagai arkib.
+
+Nota:
+- Nama fail dipaparkan pada butang, jadi namakan dengan jelas, cth `Jadual Guru Bertugas Disember 2026`.
+- Hanya **halaman pertama** PDF dipaparkan sebagai gambar. Guru boleh tekan **Buka PDF** untuk fail penuh.
+- Tersilap upload? Padam fail itu; app kembali memaparkan fail sebelumnya.
+- Fail dikongsi sebagai *sesiapa yang ada link boleh lihat* (dibuat automatik) supaya guru boleh melihatnya tanpa log masuk Google.
+
+**Sediakan sekali sahaja (pemilik Sheet):** selepas `Code.gs` dikemas kini dan **setup** dijalankan, folder ini dicipta di Drive pemilik dan ID-nya disimpan dalam tab Tetapan (`folder_jadual`). Klik kanan folder → **Share** → tambah emel SU Quran sebagai **Editor**.
 
 ## Tab Admin
 - Senarai semua guru dengan jumlah jam dan RM bagi bulan dipilih.
