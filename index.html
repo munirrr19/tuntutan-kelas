@@ -543,7 +543,7 @@
     </div>
     <div class="pantas tiada-cetak" style="margin:0 0 12px">
       <button class="btn" onclick="cetakRingkasan()">Senarai penerima imbuhan</button>
-      <button class="btn" onclick="suratClaim()">Surat claim (PDF)</button>
+      <button class="btn" onclick="suratClaim()">Surat tuntutan (PDF)</button>
     </div>
     <div class="kad tiada-cetak">
       <b>Jadual kelas bulanan</b>
@@ -669,7 +669,7 @@ const token = () => localStorage.getItem('token') || '';
 if (kunci && kunci !== token() && (!token() || confirm('Tukar ke akaun lain?'))) localStorage.setItem('token', kunci);
 
 async function api(body) {
-  if (!token()) throw new Error('Sila buka link peribadi anda daripada admin');
+  if (!token()) throw new Error('Sila buka pautan peribadi anda daripada admin');
   const res = body
     ? await fetch(API, { method: 'POST', body: JSON.stringify({ ...body, token: token() }) })
     : await fetch(API + '?token=' + encodeURIComponent(token()) + '&tahun=' + tahunDimuat);
@@ -962,7 +962,7 @@ function lukis() {
   </div>`;
 
   if (!token()) {
-    $('senarai').innerHTML = '<div class="kosong">Pautan peribadi diperlukan. Sila buka link peribadi anda daripada admin.</div>';
+    $('senarai').innerHTML = '<div class="kosong">Pautan peribadi diperlukan. Sila buka pautan peribadi anda daripada admin.</div>';
   } else if (sedangMuat) {
     $('senarai').innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
   } else {
@@ -1109,7 +1109,7 @@ function suratHTML() {
 window.suratClaim = () => {
   if (!senaraiBayaran().length) return mesej('Tiada rekod untuk bulan ini', true);
   const tajuk = document.title;
-  document.title = `Surat Claim ${namaBulan()}`;
+  document.title = `Surat Tuntutan ${namaBulan()}`;
   $('borangAdmin').innerHTML = suratHTML(); skalaBorang();
   print();
   document.title = tajuk; lukisAdmin();
