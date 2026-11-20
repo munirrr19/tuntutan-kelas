@@ -39,6 +39,15 @@
     overflow-x: hidden;
   }
   .tabular { font-variant-numeric: tabular-nums; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+  /* Fokus papan kekunci: cincin hanya muncul bila guna papan kekunci (sentuhan/tetikus tidak berubah).
+     Medan input/select kekal dengan sempadan hijau di bawah. */
+  button:focus-visible, a:focus-visible { outline: 3px solid var(--hijau); outline-offset: 2px; }
+  header button:focus-visible, .mesej button:focus-visible { outline-color: #fff; }
+  nav button:focus-visible { outline-offset: -3px; }
+  .tarikh-kotak:has(#tarikh:focus-visible) #tarikhPapar, label.btn:has(input:focus-visible) { outline: 3px solid var(--hijau); outline-offset: 2px; }
+  .bulan-kotak:has(input:focus-visible) { outline: 3px solid var(--hijau); outline-offset: 2px; }
 
   /* Header */
   header {
@@ -535,7 +544,7 @@
     <div class="kad tiada-cetak">
       <b>Jadual kelas bulanan</b>
       <div class="label-petunjuk" id="statusJadual" style="margin:4px 0 10px"></div>
-      <label class="btn" style="margin:0">Muat naik jadual baru<input type="file" accept="image/*,application/pdf" hidden onchange="muatNaikJadual(this)"></label>
+      <label class="btn" style="margin:0">Muat naik jadual baru<input type="file" class="sr-only" accept="image/*,application/pdf" onchange="muatNaikJadual(this)"></label>
     </div>
     <div class="kad tiada-cetak" id="ringkasAdmin"></div>
     <div class="pratonton" id="borangAdmin"></div>
