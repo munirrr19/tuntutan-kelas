@@ -471,7 +471,8 @@
       <label for="catatan">Catatan (pilihan)</label>
       <input id="catatan" placeholder="cth: Ganti Ustaz Ali">
 
-      <button type="submit" class="btn utama" id="btnSimpan">Simpan</button>
+      <button type="submit" class="btn utama" id="btnSimpan" aria-describedby="petunjukSimpan">Simpan</button>
+      <div class="label-petunjuk" id="petunjukSimpan" style="text-align:center;margin-top:8px" hidden>Pilih Tingkatan dahulu supaya boleh Simpan.</div>
       <button type="button" class="btn" id="btnBatal" style="display:none;width:100%;margin-top:8px">Batal ubah</button>
     </form>
   </section>
@@ -676,8 +677,8 @@ function gunaData(d) {
   kadarSejam = d.kadar;
   const t = $('tingkatan').value;
   isiTingkatan(d.intensif);
-  $('tingkatan').value = idUbah ? t : localStorage.getItem('tingkatanAkhir') || t;
-  if (!$('tingkatan').value) $('tingkatan').value = TINGKATAN[0];
+  $('tingkatan').value = idUbah ? t : (t || localStorage.getItem('tingkatanAkhir') || '');
+  if (!$('tingkatan').value) $('tingkatan').value = '';
   semuaGuru = d.semuaGuru || [];
   selesai = d.selesai || [];
   jadual = d.jadual || null; kemasJadual();
@@ -796,20 +797,24 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => tukarTab(
 // ---- Catat ----
 const PILIHAN_MASA = Array.from({ length: (23 * 60 - 6 * 60) / 15 + 1 }, (_, i) => hhmm(6 * 60 + i * 15));
 function isiTingkatan(intensif) {
-  $('tingkatan').innerHTML = TINGKATAN.map(t => `<option>${t}</option>`).join('')
+  $('tingkatan').innerHTML = '<option value="" disabled>Pilih tingkatan...</option>' + TINGKATAN.map(t => `<option>${t}</option>`).join('')
     + (intensif ? `<optgroup label="Kelas Intensif">${Array.from({ length: intensif }, (_, i) => `<option>Kelas ${i + 1}</option>`).join('')}</optgroup>` : '');
   lukisChipsTingkatan();
 }
 function lukisChipsTingkatan() {
-  const sediaAda = [...$('tingkatan').options].map(o => o.value);
+  const sediaAda = [...$('tingkatan').options].map(o => o.value).filter(Boolean);
   let kerap = JSON.parse(localStorage.getItem('tingkatanKerap') || '["4A","4B","Syahadah","Tahsin"]');
-  kerap = kerap.filter(t => sediaAda.includes(t)).slice(0, 4);
-  if (!kerap.length) kerap = sediaAda.slice(0, 4);
+  kerap = kerap.filter(t => sediaAda.includes(t));
+  // Lengkapkan sehingga 4 chip (selepas simpan pertama, senarai kerap hanya ada 1)
+  for (const t of ['4A', '4B', 'Syahadah', 'Tahsin', ...sediaAda]) if (kerap.length < 4 && sediaAda.includes(t) && !kerap.includes(t)) kerap.push(t);
+  kerap = kerap.slice(0, 4);
   const semasa = $('tingkatan').value;
-  $('chipsTingkatan').innerHTML = kerap.map(t => `<button type="button" class="chip${t === semasa ? ' aktif' : ''}" onclick="pilihTingkatan('${esc(t)}')">${esc(t)}</button>`).join('');
+  // Pilihan semasa sentiasa nampak sebagai chip aktif, walaupun bukan antara yang kerap
+  if (semasa && !kerap.includes(semasa)) kerap = [...kerap.slice(0, 3), semasa];
+  $('chipsTingkatan').innerHTML = kerap.map(t => `<button type="button" class="chip${t === semasa ? ' aktif' : ''}" aria-pressed="${t === semasa}" onclick="pilihTingkatan('${esc(t)}')">${esc(t)}</button>`).join('');
 }
-window.pilihTingkatan = t => { $('tingkatan').value = t; lukisChipsTingkatan(); };
-$('tingkatan').onchange = lukisChipsTingkatan;
+window.pilihTingkatan = t => { $('tingkatan').value = t; lukisChipsTingkatan(); kemasRingkas(); };
+$('tingkatan').onchange = () => { lukisChipsTingkatan(); kemasRingkas(); };
 
 isiTingkatan(0);
 for (const id of ['mula', 'tamat']) $(id).innerHTML = PILIHAN_MASA.map(t => `<option value="${t}">${masaTeks(t)}</option>`).join('');
@@ -849,13 +854,15 @@ function kemasRingkas() {
     el.className = 'ringkas ralat';
     el.textContent = 'Masa tamat mesti selepas masa mula';
   }
-  $('btnSimpan').disabled = !(j > 0);
+  const adaTingkatan = !!$('tingkatan').value;
+  $('btnSimpan').disabled = !(j > 0 && adaTingkatan);
+  $('petunjukSimpan').hidden = adaTingkatan;
 }
 function resetCatat() {
   idUbah = null;
   $('tarikh').value = new Date().toLocaleDateString('en-CA');
-  $('tingkatan').value = localStorage.getItem('tingkatanAkhir') || TINGKATAN[0];
-  if (!$('tingkatan').value) $('tingkatan').value = TINGKATAN[0];
+  $('tingkatan').value = localStorage.getItem('tingkatanAkhir') || '';
+  if (!$('tingkatan').value) $('tingkatan').value = ''; // tiada lalai: guru mesti pilih
   $('mula').value = localStorage.getItem('mulaAkhir') || '08:00';
   $('catatan').value = '';
   $('btnSimpan').textContent = 'Simpan';
@@ -872,6 +879,7 @@ $('btnBatal').onclick = resetCatat;
 
 $('fCatat').onsubmit = async e => {
   e.preventDefault();
+  if (!$('tingkatan').value) return mesej('Pilih Tingkatan dahulu', true);
   const r = {
     id: idUbah || crypto.randomUUID(),
     tarikh: $('tarikh').value,
