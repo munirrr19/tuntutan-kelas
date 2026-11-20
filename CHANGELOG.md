@@ -3,15 +3,6 @@
 Butiran penuh: `git log`.
 
 ## 2026-11-20
-- **Identiti baharu** berdasarkan lambang maahad dan ikon e-Tuntutan: latar kertas, hijau maahad, garis emas; fon Amiri (tajuk, bulan, RM) dan IBM Plex Sans, dimuat dari `fonts/`.
-- Header: baris Arab nama maahad, corak bintang lapan, garis emas dua lapis.
-- Ringkasan bulan di Senarai menjadi kad "Jumlah tuntutan" dengan kubah emas; bulan SELESAI dibingkai dua garis emas.
-- Telefon: pill status hanya titik bila semua rekod tersimpan; teks muncul bila luar talian atau sedang menghantar.
-- Kebolehgunaan: semua butang sekurang-kurangnya 44px, cincin fokus papan kekunci, mesej ralat kekal sehingga ditutup.
-- Tanpa pautan peribadi: borang Catat, tab Borang dan Tetapan disembunyikan; dipaparkan arahan 3 langkah.
-- Istilah diseragamkan: *pautan* (bukan link), **Surat tuntutan (PDF)**, status *Tersimpan*.
-- Warna hijau rata (tiada gradient); teks kelabu lebih gelap untuk kontras.
-- Senarai kosong ada butang **+ Catat kelas**; SELESAI yang belum boleh ditekan menerangkan sebabnya.
 - Butang **Jadual** di header: memaparkan jadual bulanan (PDF/gambar). SU Quran muat naik dari tab Admin; fail baru menggantikan yang lama.
 
 ## 2026-11-12

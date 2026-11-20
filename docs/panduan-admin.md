@@ -47,12 +47,12 @@ Nota:
 - Status setiap guru: **✓ Selesai** atau **Belum selesai**. Yang belum selesai berada di atas.
 - Cetak borang setiap guru, atau semua sekali.
 
-### Urusan tuntutan
+### Urusan claim
 - **Senarai penerima imbuhan:** satu halaman senarai nama, No KP, jam dan RM semua guru.
-- **Surat tuntutan (PDF):** surat permohonan kepada Pengetua bersama lampiran senarai penerima. Pilih **Save as PDF** dalam tetingkap cetak.
+- **Surat claim (PDF):** surat permohonan kepada Pengetua bersama lampiran senarai penerima. Pilih **Save as PDF** dalam tetingkap cetak.
 
 ## Aliran hujung bulan
 1. Ingatkan guru menekan **SELESAI** di tab Borang.
 2. Di tab Admin, pastikan semua guru ✓ Selesai.
-3. Cetak senarai penerima dan surat tuntutan.
+3. Cetak senarai penerima dan surat claim.
 4. Jika ada pembetulan, guru menekan **Buka semula untuk ubah**, betulkan, kemudian SELESAI semula.
