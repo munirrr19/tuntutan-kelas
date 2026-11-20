@@ -312,34 +312,6 @@
   .modal-kotak p { margin: 0 0 16px; font-size: .86rem; color: #4b5563; line-height: 1.45; }
   .modal-aksi { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
-  /* Jadual guru bertugas (PDF/gambar dari folder Drive) */
-  .jadual-bar {
-    width: 100%; display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
-    padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(15,107,79,.2);
-    background: var(--hijau-muda); color: var(--hijau-teks); font: inherit; text-align: left; cursor: pointer;
-  }
-  .jadual-bar[hidden] { display: none; }
-  .jadual-bar svg { width: 22px; height: 22px; flex: none; }
-  .jadual-bar span { flex: 1; min-width: 0; }
-  .jadual-bar b { display: block; font-size: .88rem; }
-  .jadual-bar small { display: block; font-size: .74rem; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .jadual-bar .anak-panah { flex: none; font-size: 1.3rem; line-height: 1; }
-  .jadual-latar { position: fixed; inset: 0; z-index: 60; background: #111827; display: none; flex-direction: column; }
-  .jadual-latar.buka { display: flex; }
-  .jadual-atas {
-    display: flex; align-items: center; gap: 8px; color: #fff;
-    padding: calc(10px + env(safe-area-inset-top)) 12px 10px;
-  }
-  .jadual-atas b { flex: 1; min-width: 0; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .jadual-atas a { padding: 7px 10px; font-size: .78rem; border-color: rgba(255,255,255,.4); background: transparent; color: #fff; }
-  .jadual-tutup { width: 38px; height: 38px; border-radius: 10px; border: 0; background: rgba(255,255,255,.14); color: #fff; font-size: 1.1rem; cursor: pointer; flex: none; }
-  .jadual-isi { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; background: #fff; }
-  .jadual-isi img { display: block; width: 100%; height: auto; cursor: zoom-in; }
-  .jadual-isi.zum img { width: 260%; max-width: none; cursor: zoom-out; }
-  @media (min-width: 900px) { .jadual-isi.zum img { width: 180%; } }
-  .jadual-status { color: var(--kelabu); text-align: center; padding: 40px 16px; font-size: .86rem; }
-  .jadual-petunjuk { color: rgba(255,255,255,.7); font-size: .72rem; text-align: center; padding: 6px 12px calc(8px + env(safe-area-inset-bottom)); }
-
   /* Borang: susunan meniru borang kertas, A4 (TIDAK DIUBAH untuk cetakan) */
   .pratonton { overflow-x: auto; background: #e5e7eb; padding: 12px; border-radius: 12px; }
   #borang, #borangAdmin { padding: 8px; }
@@ -376,7 +348,7 @@
   @media print {
     @page { size: A4; margin: 0; }
     body { background: #fff; }
-    header, nav, .tiada-cetak, .mesej, .modal-latar, .jadual-latar { display: none !important; }
+    header, nav, .tiada-cetak, .mesej, .modal-latar { display: none !important; }
     main { max-width: none; padding: 0 !important; }
     section:not(.aktif) { display: none !important; }
     .pratonton { background: none; padding: 0; overflow: visible; }
@@ -423,11 +395,6 @@
 
 <main>
   <section id="tab-catat" class="aktif">
-    <button type="button" class="jadual-bar" id="btnJadual" hidden onclick="bukaJadual()">
-      <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-      <span><b>Jadual Guru Bertugas</b><small id="jadualNama"></small></span>
-      <span class="anak-panah" aria-hidden="true">›</span>
-    </button>
     <div id="bannerToken" class="banner-amaran" style="display:none">
       <span>Pautan peribadi diperlukan. Sila buka link peribadi anda daripada admin.</span>
     </div>
@@ -543,19 +510,6 @@
   </div>
 </div>
 
-<div class="jadual-latar" id="jadualLatar" role="dialog" aria-modal="true" aria-labelledby="jadualTajuk">
-  <div class="jadual-atas">
-    <b id="jadualTajuk">Jadual Guru Bertugas</b>
-    <a class="btn" id="jadualAsal" target="_blank" rel="noopener">Buka PDF</a>
-    <button type="button" class="jadual-tutup" onclick="tutupJadual()" aria-label="Tutup">✕</button>
-  </div>
-  <div class="jadual-isi" id="jadualIsi">
-    <div class="jadual-status" id="jadualStatus">Memuatkan jadual...</div>
-    <img id="jadualImg" alt="Jadual guru bertugas" hidden>
-  </div>
-  <div class="jadual-petunjuk">Ketik gambar untuk besarkan · Cubit untuk zum</div>
-</div>
-
 <script>
 const BULAN = ['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','September','Oktober','November','Disember'];
 const TINGKATAN = [1,2,3,4,5,6].flatMap(t => [t + 'A', t + 'B']).concat('Syahadah', 'Tahsin', 'Daurah');
@@ -575,7 +529,6 @@ let sedangMuat = true;
 let menyegar = false;
 let adminTapis = 'semua';
 let adminCari = '';
-let jadual = null;      // {id, nama, pdf}: fail jadual terbaharu dalam folder Drive
 let bulan = new Date().toLocaleDateString('en-CA').slice(0, 7);
 
 const minit = hhmm => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
@@ -687,7 +640,6 @@ function gunaData(d) {
   $('navAdmin').hidden = !guru.admin;
   $('namaHeader').textContent = guru.nama ? `${guru.nama} · MTAQ` : 'MTAQ Pulai Chondong';
   isiTetapan(); lukis(); kemasRingkas(); lukisChipsTingkatan(); kemasBannerKunci();
-  kemasJadual(d.jadual || null);
 }
 async function muat() {
   const tahun = tahunDimuat;
@@ -744,40 +696,6 @@ async function hantar() {
 addEventListener('online', () => { kemasSync(); hantar(); });
 addEventListener('offline', kemasSync);
 addEventListener('beforeunload', e => { if (gilir().length) e.preventDefault(); });
-
-// ---- Jadual guru bertugas ----
-// Drive menukar halaman pertama PDF kepada gambar (thumbnail), jadi guru terus nampak jadual tanpa pembaca PDF
-const gambarJadual = j => `https://drive.google.com/thumbnail?id=${encodeURIComponent(j.id)}&sz=w2400`;
-function kemasJadual(j) {
-  const sama = jadual && j && jadual.id === j.id;
-  jadual = j;
-  $('btnJadual').hidden = !j;
-  if (!j) return;
-  $('jadualNama').textContent = j.nama;
-  $('jadualTajuk').textContent = j.nama;
-  $('jadualAsal').href = `https://drive.google.com/file/d/${encodeURIComponent(j.id)}/view`;
-  $('jadualAsal').textContent = j.pdf ? 'Buka PDF' : 'Buka asal';
-  if (sama) return;
-  // Muat awal supaya jadual keluar serta-merta bila ditekan
-  const img = $('jadualImg');
-  img.hidden = true;
-  $('jadualStatus').hidden = false;
-  $('jadualStatus').textContent = 'Memuatkan jadual...';
-  img.onload = () => { img.hidden = false; $('jadualStatus').hidden = true; };
-  img.onerror = () => { $('jadualStatus').textContent = 'Jadual tidak dapat dipaparkan. Tekan "Buka PDF" di atas.'; };
-  img.src = gambarJadual(j);
-}
-const tutupJadual_ = () => { $('jadualLatar').classList.remove('buka'); $('jadualIsi').classList.remove('zum'); };
-window.bukaJadual = () => {
-  if (!jadual) return;
-  $('jadualLatar').classList.add('buka');
-  // Butang Back telefon menutup jadual, bukan keluar dari app
-  history.pushState({ jadual: 1 }, '');
-};
-window.tutupJadual = () => history.state && history.state.jadual ? history.back() : tutupJadual_();
-addEventListener('popstate', tutupJadual_);
-addEventListener('keydown', e => { if (e.key === 'Escape' && $('jadualLatar').classList.contains('buka')) tutupJadual(); });
-$('jadualImg').onclick = () => $('jadualIsi').classList.toggle('zum');
 
 // ---- Tab ----
 function tukarTab(nama) {
