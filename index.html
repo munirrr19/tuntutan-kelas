@@ -289,6 +289,7 @@
   .item-tindakan { display: flex; gap: 10px; flex: none; }
   .item .btn { padding: 5px 9px; font-size: .75rem; border-radius: 8px; }
   .kosong { color: var(--kelabu); text-align: center; padding: 24px 0; font-size: .9rem; }
+  .kosong .btn { margin-top: 12px; }
 
   /* Admin Progress & Senarai Padat */
   .progress-wrap { width: 100%; height: 8px; background: #e5e7eb; border-radius: 999px; overflow: hidden; margin: 8px 0 12px; }
@@ -973,14 +974,15 @@ function lukis() {
           <small class="tabular"><b>${jamTeks(x.jam)} jam</b>${x.catatan ? ' · ' + esc(x.catatan) : ''}</small></div>
           ${s ? '' : `<div class="item-tindakan"><button class="btn" onclick="ubah('${x.id}')">Ubah</button>
           <button class="btn bahaya" onclick="padam('${x.id}')">Padam</button></div>`}</div>`).join('')
-      : '<div class="kosong">Tiada rekod untuk bulan ini</div>');
+      : `<div class="kosong">Tiada rekod untuk ${namaBulan()}.${s ? '' : '<br><button type="button" class="btn" onclick="catatBulanIni()">+ Catat kelas</button>'}</div>`);
   }
 
   $('kotakSelesai').innerHTML = s
     ? `<div class="ringkas" style="margin:0">${teksSelesai(s)}</div>
        <button class="btn" style="width:100%;margin-top:8px" onclick="tandaSelesai(true)">Buka semula untuk ubah</button>`
     : `<small style="color:var(--kelabu)">Semak borang di bawah. Bila semua kelas ${namaBulan()} sudah diisi, tekan SELESAI supaya Setiausaha boleh proses tuntutan.</small>
-       <button class="btn utama" ${senarai.length ? '' : 'disabled'} onclick="tandaSelesai(false)">SELESAI</button>`;
+       <button class="btn utama" ${senarai.length ? '' : 'disabled aria-describedby="sebabLumpuh"'} onclick="tandaSelesai(false)">SELESAI</button>
+       ${senarai.length ? '' : `<small id="sebabLumpuh" style="display:block;margin-top:8px;color:var(--kelabu);text-align:center">Belum ada rekod untuk dihantar bagi ${namaBulan()}.</small>`}`;
 
   $('borang').innerHTML = borangHTML(guru, senarai);
   if (guru.admin) lukisAdmin();
@@ -1145,6 +1147,11 @@ function borangHTML(profil, senarai) {
   </div>`).join('');
 }
 
+// Butang "+ Catat kelas": buka tab Catat; jika bulan yang dilihat bukan bulan tarikh semasa borang, tarikh ke hari pertama bulan itu
+window.catatBulanIni = () => {
+  if (!$('tarikh').value.startsWith(bulan)) { $('tarikh').value = bulan + '-01'; paparTarikh(); }
+  tukarTab('catat');
+};
 window.ubah = id => {
   const x = entri.find(e => e.id === id);
   idUbah = id;
