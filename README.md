@@ -13,7 +13,7 @@ Website untuk guru merekod kelas Al-Quran yang diajar setiap hari dan menjana Bo
 - **Catat** kelas selepas mengajar: tarikh, Tingkatan, masa mula dan tamat (setiap 15 minit). Amaran jika bertindih.
 - **Simpan serta-merta** dengan gilir di telefon: rekod tidak hilang walaupun tiada internet.
 - **Borang** bulanan dengan jumlah jam dan RM. Butang **SELESAI** mengunci bulan itu.
-- **Admin:** status semua guru, senarai penerima imbuhan dan surat claim (PDF).
+- **Admin:** status semua guru, senarai penerima imbuhan dan surat tuntutan (PDF).
 - Kadar sejam dan kelas intensif ditetapkan dalam Sheet.
 - Boleh dipasang di skrin utama telefon (PWA).
 
@@ -22,7 +22,7 @@ Website untuk guru merekod kelas Al-Quran yang diajar setiap hari dan menjana Bo
 | Dokumen | Untuk siapa |
 |---|---|
 | [docs/panduan-guru.md](docs/panduan-guru.md) | Guru: catat kelas, Borang, SELESAI |
-| [docs/panduan-admin.md](docs/panduan-admin.md) | Admin / Setiausaha: tambah guru, link, tetapan, claim |
+| [docs/panduan-admin.md](docs/panduan-admin.md) | Admin / Setiausaha: tambah guru, link, tetapan, tuntutan |
 | [docs/panduan-serahan.md](docs/panduan-serahan.md) | Pengganti: akses, sandaran, pemulihan |
 | [docs/pembangunan.md](docs/pembangunan.md) | Pembangun: seni bina, kemas kini laman dan `Code.gs` |
 | [docs/data.md](docs/data.md) | Struktur Sheet dan API |

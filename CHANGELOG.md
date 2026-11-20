@@ -3,6 +3,7 @@
 Butiran penuh: `git log`.
 
 ## 2026-11-20
+- Penambahbaikan penggunaan (rupa kekal): tanpa pautan peribadi dipaparkan arahan 3 langkah dan borang disembunyikan; mesej ralat kekal sehingga ditutup dan toast tidak lagi menutup Simpan; Tingkatan tiada lalai 1A (Simpan lumpuh sehingga dipilih) dan pilihan semasa sentiasa chip aktif; kawasan sentuh butang dilebarkan (Ubah/Padam, chip, Masa); cincin fokus papan kekunci; modal guna `<dialog>`; senarai kosong ada butang **+ Catat kelas** dan SELESAI yang lumpuh menerangkan sebabnya; istilah *pautan* dan *Surat tuntutan*.
 - Butang **Jadual** di header: memaparkan jadual bulanan (PDF/gambar). SU Quran muat naik dari tab Admin; fail baru menggantikan yang lama.
 
 ## 2026-11-12

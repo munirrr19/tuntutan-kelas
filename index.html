@@ -39,6 +39,15 @@
     overflow-x: hidden;
   }
   .tabular { font-variant-numeric: tabular-nums; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+  /* Fokus papan kekunci: cincin hanya muncul bila guna papan kekunci (sentuhan/tetikus tidak berubah).
+     Medan input/select kekal dengan sempadan hijau di bawah. */
+  button:focus-visible, a:focus-visible { outline: 3px solid var(--hijau); outline-offset: 2px; }
+  header button:focus-visible, .mesej button:focus-visible { outline-color: #fff; }
+  nav button:focus-visible { outline-offset: -3px; }
+  .tarikh-kotak:has(#tarikh:focus-visible) #tarikhPapar, label.btn:has(input:focus-visible) { outline: 3px solid var(--hijau); outline-offset: 2px; }
+  .bulan-kotak:has(input:focus-visible) { outline: 3px solid var(--hijau); outline-offset: 2px; }
 
   /* Header */
   header {
@@ -124,7 +133,7 @@
     nav button svg { width: 22px; height: 22px; }
     nav button.aktif { background: var(--hijau-muda); }
     main { padding-bottom: calc(96px + env(safe-area-inset-bottom)) !important; }
-    .mesej { bottom: calc(86px + env(safe-area-inset-bottom)) !important; }
+    .mesej { top: calc(76px + env(safe-area-inset-top)) !important; }
   }
 
   main { max-width: 620px; margin: 0 auto; padding: 14px; }
@@ -228,6 +237,11 @@
     background: #d97706; color: #fff; font: inherit; font-size: .75rem; font-weight: 600; cursor: pointer;
   }
 
+  .tiada-token h2 { font-size: 1.05rem; margin: 0 0 6px; }
+  .tiada-token p { margin: 0 0 12px; font-size: .9rem; color: #374151; line-height: 1.5; }
+  .tiada-token ol { margin: 0; padding-left: 20px; font-size: .9rem; line-height: 1.6; }
+  .tiada-token li { margin-bottom: 6px; }
+
   /* Pemilih bulan */
   .bulan { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
   .bulan-kotak {
@@ -272,9 +286,10 @@
   .item-atas.sebaris b { white-space: nowrap; font-size: .88rem; }
   .tag-kelas { background: var(--hijau-muda); color: var(--hijau); font-size: .72rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; white-space: nowrap; flex: none; }
   .item small { color: var(--kelabu); display: block; margin-top: 3px; font-size: .8rem; }
-  .item-tindakan { display: flex; gap: 5px; flex: none; }
+  .item-tindakan { display: flex; gap: 10px; flex: none; }
   .item .btn { padding: 5px 9px; font-size: .75rem; border-radius: 8px; }
   .kosong { color: var(--kelabu); text-align: center; padding: 24px 0; font-size: .9rem; }
+  .kosong .btn { margin-top: 12px; }
 
   /* Admin Progress & Senarai Padat */
   .progress-wrap { width: 100%; height: 8px; background: #e5e7eb; border-radius: 999px; overflow: hidden; margin: 8px 0 12px; }
@@ -284,26 +299,49 @@
   #ringkasAdmin .item small { font-size: .73rem; margin-top: 2px; }
   #ringkasAdmin .lencana { font-size: .66rem; padding: 2px 7px; }
 
+  /* Kawasan sentuh 44px. Saiz visual tidak berubah: lapisan ::after tak nampak
+     melebihi butang. Item padat (Ubah, Padam, Cetak) hanya dilebarkan menegak. */
+  .sync-pill, .chip, .chip-kecil, .btn, .bulan-nav { position: relative; }
+  .sync-pill::after, .chip::after, .chip-kecil::after, .btn::after, .bulan-nav::after { content: ""; position: absolute; }
+  .sync-pill::after { inset: -11px -4px; }
+  .chip::after, .chip-kecil::after { inset: -8px 0; }
+  .chip-kecil { z-index: 1; }
+  .btn::after { inset: -3px 0; }
+  .item .btn::after { inset: -9px 0; }
+  .bulan-nav::after { inset: -2px; }
+  /* Masa mula/tamat: select dilebarkan ke atas, kiri dan bawah (margin negatif) supaya sasaran
+     sentuh 44px; teks dan anak panah kekal di kedudukan asal */
+  .masa-baris select { position: relative; margin: -12px 0 -8px -10px; width: calc(100% + 10px); height: 44px; padding: 4px 0 0 10px; }
+
   /* Skeleton loading */
   .skel { height: 54px; border-radius: 10px; background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%); background-size: 200% 100%; animation: kilau 1.2s infinite; margin-bottom: 8px; }
   @keyframes kilau { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
   /* Toast & Modal */
   .mesej {
-    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+    position: fixed; left: 50%; top: 122px; transform: translateX(-50%);
     background: #111827; color: #fff; padding: 10px 16px; border-radius: 999px;
-    display: none; align-items: center; gap: 8px; z-index: 40; max-width: 90vw;
+    display: none; align-items: center; gap: 8px; z-index: 40; width: max-content; max-width: 90vw;
     font-size: .84rem; font-weight: 600; box-shadow: 0 10px 25px rgba(0,0,0,.22);
   }
   .mesej-dot { width: 8px; height: 8px; border-radius: 50%; background: #34d399; flex: none; }
   .mesej.err .mesej-dot { background: #f87171; }
+  .mesej-tutup {
+    display: none; flex: none; min-height: 44px; min-width: 64px; padding: 0 14px; border: 0; border-radius: 999px;
+    background: rgba(255,255,255,.18); color: #fff; font: inherit; font-size: .8rem; font-weight: 600; cursor: pointer;
+  }
+  .mesej.err { padding-right: 6px; }
+  .mesej.err .mesej-tutup { display: block; }
 
   .modal-latar {
     position: fixed; inset: 0; background: rgba(0,0,0,.45); backdrop-filter: blur(2px);
     display: none; align-items: flex-end; justify-content: center; padding: 14px; z-index: 50;
+    /* <dialog>: buang gaya lalai pelayar supaya kekal lapisan penuh skrin */
+    margin: 0; border: 0; width: 100%; height: 100%; max-width: none; max-height: none; color: inherit;
   }
+  .modal-latar::backdrop { background: transparent; }
   @media (min-width: 640px) { .modal-latar { align-items: center; } }
-  .modal-latar.buka { display: flex; }
+  .modal-latar[open] { display: flex; }
   .modal-kotak {
     width: 100%; max-width: 400px; background: #fff; border-radius: 18px;
     padding: 18px; box-shadow: 0 20px 45px rgba(0,0,0,.25);
@@ -403,8 +441,14 @@
 
 <main>
   <section id="tab-catat" class="aktif">
-    <div id="bannerToken" class="banner-amaran" style="display:none">
-      <span>Pautan peribadi diperlukan. Sila buka link peribadi anda daripada admin.</span>
+    <div id="bannerToken" class="kad tiada-token" hidden>
+      <h2>Buka pautan peribadi anda dahulu</h2>
+      <p>Setiap guru ada pautan sendiri. Pautan itu memberitahu sistem siapa anda, jadi rekod tidak bercampur dengan guru lain.</p>
+      <ol>
+        <li>Minta pautan peribadi daripada Setiausaha Al-Quran (admin).</li>
+        <li>Buka pautan itu di telefon ini. Ia akan diingat secara automatik.</li>
+        <li>Lepas itu, buka sistem ini seperti biasa untuk mencatat kelas.</li>
+      </ol>
     </div>
     <div id="bannerKunci" class="banner-amaran" style="display:none">
       <span>Bulan ini sudah ditanda <b>SELESAI</b>. Buka semula di tab Borang untuk tambah atau ubah.</span>
@@ -454,7 +498,8 @@
       <label for="catatan">Catatan (pilihan)</label>
       <input id="catatan" placeholder="cth: Ganti Ustaz Ali">
 
-      <button type="submit" class="btn utama" id="btnSimpan">Simpan</button>
+      <button type="submit" class="btn utama" id="btnSimpan" aria-describedby="petunjukSimpan">Simpan</button>
+      <div class="label-petunjuk" id="petunjukSimpan" style="text-align:center;margin-top:8px" hidden>Pilih Tingkatan dahulu supaya boleh Simpan.</div>
       <button type="button" class="btn" id="btnBatal" style="display:none;width:100%;margin-top:8px">Batal ubah</button>
     </form>
   </section>
@@ -498,21 +543,21 @@
     </div>
     <div class="pantas tiada-cetak" style="margin:0 0 12px">
       <button class="btn" onclick="cetakRingkasan()">Senarai penerima imbuhan</button>
-      <button class="btn" onclick="suratClaim()">Surat claim (PDF)</button>
+      <button class="btn" onclick="suratClaim()">Surat tuntutan (PDF)</button>
     </div>
     <div class="kad tiada-cetak">
       <b>Jadual kelas bulanan</b>
       <div class="label-petunjuk" id="statusJadual" style="margin:4px 0 10px"></div>
-      <label class="btn" style="margin:0">Muat naik jadual baru<input type="file" accept="image/*,application/pdf" hidden onchange="muatNaikJadual(this)"></label>
+      <label class="btn" style="margin:0">Muat naik jadual baru<input type="file" class="sr-only" accept="image/*,application/pdf" onchange="muatNaikJadual(this)"></label>
     </div>
     <div class="kad tiada-cetak" id="ringkasAdmin"></div>
     <div class="pratonton" id="borangAdmin"></div>
   </section>
 </main>
 
-<div class="mesej" id="mesej" role="status" aria-live="polite"><span class="mesej-dot"></span><span id="mesejTeks"></span></div>
+<div class="mesej" id="mesej" role="status" aria-live="polite"><span class="mesej-dot"></span><span id="mesejTeks"></span><button type="button" class="mesej-tutup" id="mesejTutup">Tutup</button></div>
 
-<div class="modal-latar" id="modalLatar" role="dialog" aria-modal="true" aria-labelledby="modalTajuk">
+<dialog class="modal-latar" id="modalLatar" aria-labelledby="modalTajuk">
   <div class="modal-kotak">
     <h3 id="modalTajuk">Sahkan</h3>
     <p id="modalTeks"></p>
@@ -521,15 +566,15 @@
       <button type="button" class="btn utama" style="margin-top:0" id="modalTerus">Teruskan</button>
     </div>
   </div>
-</div>
+</dialog>
 
-<div class="modal-latar" id="jadualLatar" role="dialog" aria-modal="true" aria-labelledby="jadualTajuk">
+<dialog class="modal-latar" id="jadualLatar" aria-labelledby="jadualTajuk">
   <div class="modal-kotak">
     <div class="label-baris" style="margin-top:0"><h3 id="jadualTajuk" style="margin:0">Jadual Kelas</h3><a class="label-petunjuk" id="jadualPenuh" target="_blank" rel="noopener">Buka penuh ↗</a></div>
     <iframe id="jadualBingkai" title="Jadual kelas"></iframe>
-    <button type="button" class="btn" style="width:100%;margin-top:10px" onclick="$('jadualLatar').classList.remove('buka')">Tutup</button>
+    <button type="button" class="btn" style="width:100%;margin-top:10px" onclick="$('jadualLatar').close()">Tutup</button>
   </div>
-</div>
+</dialog>
 
 <script>
 const BULAN = ['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','September','Oktober','November','Disember'];
@@ -574,13 +619,17 @@ console.assert(pecah([1,2,3], 2).length === 2 && pecah([], 20).length === 1, 'pe
 const bertindih = (a, b) => minit(a.mula) < minit(b.tamat) && minit(b.mula) < minit(a.tamat);
 console.assert(bertindih({ mula: '08:00', tamat: '10:00' }, { mula: '09:30', tamat: '11:00' }) && !bertindih({ mula: '08:00', tamat: '10:00' }, { mula: '10:00', tamat: '12:00' }), 'bertindih');
 
+// Mesej biasa hilang sendiri; mesej ralat kekal sehingga guru tekan Tutup
 function mesej(teks, ralat = false) {
   const m = $('mesej');
   $('mesejTeks').textContent = teks;
   m.classList.toggle('err', ralat);
+  m.setAttribute('role', ralat ? 'alert' : 'status');
   m.style.display = 'flex';
-  clearTimeout(mesej.t); mesej.t = setTimeout(() => m.style.display = 'none', 2600);
+  clearTimeout(mesej.t);
+  if (!ralat) mesej.t = setTimeout(() => m.style.display = 'none', 2600);
 }
+$('mesejTutup').onclick = () => $('mesej').style.display = 'none';
 function sahkan(tajuk, teks, labelTerus = 'Teruskan', bahaya = false) {
   return new Promise(resolve => {
     const asal = document.activeElement;
@@ -590,16 +639,17 @@ function sahkan(tajuk, teks, labelTerus = 'Teruskan', bahaya = false) {
     btn.textContent = labelTerus;
     btn.className = bahaya ? 'btn bahaya' : 'btn utama';
     btn.style.marginTop = '0';
-    $('modalLatar').classList.add('buka');
+    const dlg = $('modalLatar');
+    if (dlg.open) dlg.close();
+    dlg.showModal(); // perangkap fokus + latar belakang tak boleh diklik
     $('modalBatal').focus();
-    const onKey = e => { if (e.key === 'Escape') tutup(false); };
     const tutup = ok => {
-      $('modalLatar').classList.remove('buka');
-      removeEventListener('keydown', onKey);
+      dlg.oncancel = null;
+      dlg.close();
       if (asal && asal.focus) asal.focus();
       resolve(ok);
     };
-    addEventListener('keydown', onKey);
+    dlg.oncancel = e => { e.preventDefault(); tutup(false); }; // Escape
     $('modalBatal').onclick = () => tutup(false);
     $('modalLatar').onclick = e => { if (e.target === $('modalLatar')) tutup(false); };
     btn.onclick = () => tutup(true);
@@ -619,7 +669,7 @@ const token = () => localStorage.getItem('token') || '';
 if (kunci && kunci !== token() && (!token() || confirm('Tukar ke akaun lain?'))) localStorage.setItem('token', kunci);
 
 async function api(body) {
-  if (!token()) throw new Error('Sila buka link peribadi anda daripada admin');
+  if (!token()) throw new Error('Sila buka pautan peribadi anda daripada admin');
   const res = body
     ? await fetch(API, { method: 'POST', body: JSON.stringify({ ...body, token: token() }) })
     : await fetch(API + '?token=' + encodeURIComponent(token()) + '&tahun=' + tahunDimuat);
@@ -655,8 +705,8 @@ function gunaData(d) {
   kadarSejam = d.kadar;
   const t = $('tingkatan').value;
   isiTingkatan(d.intensif);
-  $('tingkatan').value = idUbah ? t : localStorage.getItem('tingkatanAkhir') || t;
-  if (!$('tingkatan').value) $('tingkatan').value = TINGKATAN[0];
+  $('tingkatan').value = idUbah ? t : (t || localStorage.getItem('tingkatanAkhir') || '');
+  if (!$('tingkatan').value) $('tingkatan').value = '';
   semuaGuru = d.semuaGuru || [];
   selesai = d.selesai || [];
   jadual = d.jadual || null; kemasJadual();
@@ -685,7 +735,7 @@ async function muat() {
   } catch (e) {
     sedangMuat = false;
     if (!c) { $('namaHeader').textContent = 'MTAQ Pulai Chondong'; lukis(); }
-    mesej(e.message, true);
+    if (token()) mesej(e.message, true); // tanpa pautan, kad arahan sudah menerangkan
   } finally {
     menyegar = false; kemasSync();
   }
@@ -729,9 +779,9 @@ function kemasJadual() {
 window.bukaJadual = () => {
   $('jadualBingkai').src = `https://drive.google.com/file/d/${jadual.id}/preview`;
   $('jadualPenuh').href = `https://drive.google.com/file/d/${jadual.id}/view`;
-  $('jadualLatar').classList.add('buka');
+  $('jadualLatar').showModal();
 };
-$('jadualLatar').onclick = e => { if (e.target === $('jadualLatar')) $('jadualLatar').classList.remove('buka'); };
+$('jadualLatar').onclick = e => { if (e.target === $('jadualLatar')) $('jadualLatar').close(); };
 // Gambar kamera telefon (5-10MB) dikecilkan dulu supaya muat naik ke Apps Script cepat
 async function kecilkan(fail) {
   const img = await createImageBitmap(fail), s = Math.min(1, 2000 / Math.max(img.width, img.height));
@@ -775,20 +825,24 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => tukarTab(
 // ---- Catat ----
 const PILIHAN_MASA = Array.from({ length: (23 * 60 - 6 * 60) / 15 + 1 }, (_, i) => hhmm(6 * 60 + i * 15));
 function isiTingkatan(intensif) {
-  $('tingkatan').innerHTML = TINGKATAN.map(t => `<option>${t}</option>`).join('')
+  $('tingkatan').innerHTML = '<option value="" disabled>Pilih tingkatan...</option>' + TINGKATAN.map(t => `<option>${t}</option>`).join('')
     + (intensif ? `<optgroup label="Kelas Intensif">${Array.from({ length: intensif }, (_, i) => `<option>Kelas ${i + 1}</option>`).join('')}</optgroup>` : '');
   lukisChipsTingkatan();
 }
 function lukisChipsTingkatan() {
-  const sediaAda = [...$('tingkatan').options].map(o => o.value);
+  const sediaAda = [...$('tingkatan').options].map(o => o.value).filter(Boolean);
   let kerap = JSON.parse(localStorage.getItem('tingkatanKerap') || '["4A","4B","Syahadah","Tahsin"]');
-  kerap = kerap.filter(t => sediaAda.includes(t)).slice(0, 4);
-  if (!kerap.length) kerap = sediaAda.slice(0, 4);
+  kerap = kerap.filter(t => sediaAda.includes(t));
+  // Lengkapkan sehingga 4 chip (selepas simpan pertama, senarai kerap hanya ada 1)
+  for (const t of ['4A', '4B', 'Syahadah', 'Tahsin', ...sediaAda]) if (kerap.length < 4 && sediaAda.includes(t) && !kerap.includes(t)) kerap.push(t);
+  kerap = kerap.slice(0, 4);
   const semasa = $('tingkatan').value;
-  $('chipsTingkatan').innerHTML = kerap.map(t => `<button type="button" class="chip${t === semasa ? ' aktif' : ''}" onclick="pilihTingkatan('${esc(t)}')">${esc(t)}</button>`).join('');
+  // Pilihan semasa sentiasa nampak sebagai chip aktif, walaupun bukan antara yang kerap
+  if (semasa && !kerap.includes(semasa)) kerap = [...kerap.slice(0, 3), semasa];
+  $('chipsTingkatan').innerHTML = kerap.map(t => `<button type="button" class="chip${t === semasa ? ' aktif' : ''}" aria-pressed="${t === semasa}" onclick="pilihTingkatan('${esc(t)}')">${esc(t)}</button>`).join('');
 }
-window.pilihTingkatan = t => { $('tingkatan').value = t; lukisChipsTingkatan(); };
-$('tingkatan').onchange = lukisChipsTingkatan;
+window.pilihTingkatan = t => { $('tingkatan').value = t; lukisChipsTingkatan(); kemasRingkas(); };
+$('tingkatan').onchange = () => { lukisChipsTingkatan(); kemasRingkas(); };
 
 isiTingkatan(0);
 for (const id of ['mula', 'tamat']) $(id).innerHTML = PILIHAN_MASA.map(t => `<option value="${t}">${masaTeks(t)}</option>`).join('');
@@ -828,13 +882,15 @@ function kemasRingkas() {
     el.className = 'ringkas ralat';
     el.textContent = 'Masa tamat mesti selepas masa mula';
   }
-  $('btnSimpan').disabled = !(j > 0);
+  const adaTingkatan = !!$('tingkatan').value;
+  $('btnSimpan').disabled = !(j > 0 && adaTingkatan);
+  $('petunjukSimpan').hidden = adaTingkatan;
 }
 function resetCatat() {
   idUbah = null;
   $('tarikh').value = new Date().toLocaleDateString('en-CA');
-  $('tingkatan').value = localStorage.getItem('tingkatanAkhir') || TINGKATAN[0];
-  if (!$('tingkatan').value) $('tingkatan').value = TINGKATAN[0];
+  $('tingkatan').value = localStorage.getItem('tingkatanAkhir') || '';
+  if (!$('tingkatan').value) $('tingkatan').value = ''; // tiada lalai: guru mesti pilih
   $('mula').value = localStorage.getItem('mulaAkhir') || '08:00';
   $('catatan').value = '';
   $('btnSimpan').textContent = 'Simpan';
@@ -851,6 +907,7 @@ $('btnBatal').onclick = resetCatat;
 
 $('fCatat').onsubmit = async e => {
   e.preventDefault();
+  if (!$('tingkatan').value) return mesej('Pilih Tingkatan dahulu', true);
   const r = {
     id: idUbah || crypto.randomUUID(),
     tarikh: $('tarikh').value,
@@ -889,7 +946,10 @@ function lukis() {
   const senarai = entriBulan(guru.id);
   const jumlahJam = jumlah(senarai);
   const s = statusSelesai(guru.id);
-  $('bannerToken').style.display = token() ? 'none' : 'flex';
+  // Tanpa pautan peribadi: hanya arahan; borang, Borang dan Tetapan disembunyikan
+  $('bannerToken').hidden = !!token();
+  $('fCatat').hidden = !token();
+  for (const t of ['borang', 'tetapan']) document.querySelector(`nav [data-tab=${t}]`).hidden = !token();
   kemasBannerKunci();
 
   $('kpiSenarai').innerHTML = `<div class="kpi-kad tabular">
@@ -902,7 +962,7 @@ function lukis() {
   </div>`;
 
   if (!token()) {
-    $('senarai').innerHTML = '<div class="kosong">Pautan peribadi diperlukan. Sila buka link peribadi anda daripada admin.</div>';
+    $('senarai').innerHTML = '<div class="kosong">Pautan peribadi diperlukan. Sila buka pautan peribadi anda daripada admin.</div>';
   } else if (sedangMuat) {
     $('senarai').innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
   } else {
@@ -914,14 +974,15 @@ function lukis() {
           <small class="tabular"><b>${jamTeks(x.jam)} jam</b>${x.catatan ? ' · ' + esc(x.catatan) : ''}</small></div>
           ${s ? '' : `<div class="item-tindakan"><button class="btn" onclick="ubah('${x.id}')">Ubah</button>
           <button class="btn bahaya" onclick="padam('${x.id}')">Padam</button></div>`}</div>`).join('')
-      : '<div class="kosong">Tiada rekod untuk bulan ini</div>');
+      : `<div class="kosong">Tiada rekod untuk ${namaBulan()}.${s ? '' : '<br><button type="button" class="btn" onclick="catatBulanIni()">+ Catat kelas</button>'}</div>`);
   }
 
   $('kotakSelesai').innerHTML = s
     ? `<div class="ringkas" style="margin:0">${teksSelesai(s)}</div>
        <button class="btn" style="width:100%;margin-top:8px" onclick="tandaSelesai(true)">Buka semula untuk ubah</button>`
     : `<small style="color:var(--kelabu)">Semak borang di bawah. Bila semua kelas ${namaBulan()} sudah diisi, tekan SELESAI supaya Setiausaha boleh proses tuntutan.</small>
-       <button class="btn utama" ${senarai.length ? '' : 'disabled'} onclick="tandaSelesai(false)">SELESAI</button>`;
+       <button class="btn utama" ${senarai.length ? '' : 'disabled aria-describedby="sebabLumpuh"'} onclick="tandaSelesai(false)">SELESAI</button>
+       ${senarai.length ? '' : `<small id="sebabLumpuh" style="display:block;margin-top:8px;color:var(--kelabu);text-align:center">Belum ada rekod untuk dihantar bagi ${namaBulan()}.</small>`}`;
 
   $('borang').innerHTML = borangHTML(guru, senarai);
   if (guru.admin) lukisAdmin();
@@ -1048,7 +1109,7 @@ function suratHTML() {
 window.suratClaim = () => {
   if (!senaraiBayaran().length) return mesej('Tiada rekod untuk bulan ini', true);
   const tajuk = document.title;
-  document.title = `Surat Claim ${namaBulan()}`;
+  document.title = `Surat Tuntutan ${namaBulan()}`;
   $('borangAdmin').innerHTML = suratHTML(); skalaBorang();
   print();
   document.title = tajuk; lukisAdmin();
@@ -1086,6 +1147,11 @@ function borangHTML(profil, senarai) {
   </div>`).join('');
 }
 
+// Butang "+ Catat kelas": buka tab Catat; jika bulan yang dilihat bukan bulan tarikh semasa borang, tarikh ke hari pertama bulan itu
+window.catatBulanIni = () => {
+  if (!$('tarikh').value.startsWith(bulan)) { $('tarikh').value = bulan + '-01'; paparTarikh(); }
+  tukarTab('catat');
+};
 window.ubah = id => {
   const x = entri.find(e => e.id === id);
   idUbah = id;

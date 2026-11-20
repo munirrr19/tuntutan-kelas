@@ -24,7 +24,7 @@ Untuk staf yang mengambil alih urusan Tuntutan Kelas. Tugasan harian tidak memer
 ## 3. Tugasan mengikut kekerapan
 
 ### Setiap bulan
-- Pastikan semua guru menekan SELESAI, kemudian cetak senarai penerima dan surat claim ([panduan-admin.md](panduan-admin.md#aliran-hujung-bulan)).
+- Pastikan semua guru menekan SELESAI, kemudian cetak senarai penerima dan surat tuntutan ([panduan-admin.md](panduan-admin.md#aliran-hujung-bulan)).
 
 ### Bila perlu
 - Guru baharu, guru berhenti, link terdedah, tukar kadar, musim intensif: lihat [panduan-admin.md](panduan-admin.md).
@@ -35,7 +35,7 @@ Untuk staf yang mengambil alih urusan Tuntutan Kelas. Tugasan harian tidak memer
 - Semak kadar sejam masih betul.
 
 ## 4. Sandaran
-- **Salinan manual Sheet** sekurang-kurangnya sebulan sekali selepas claim dihantar.
+- **Salinan manual Sheet** sekurang-kurangnya sebulan sekali selepas tuntutan dihantar.
 - **Sejarah versi:** Fail → Sejarah versi, untuk memulihkan data yang tersilap dipadam.
 - **Kod** di GitHub.
 
