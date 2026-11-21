@@ -504,6 +504,65 @@
   .penerima td, .penerima th { height: 6.3mm; white-space: nowrap; }
   .kekerapan { display: flex; justify-content: space-between; }
 
+  /* ---- Polish visual: state, fokus, sasaran sentuh, kontras ---- */
+  body { -webkit-font-smoothing: antialiased; }
+  :focus-visible { outline: 2px solid var(--hijau); outline-offset: 2px; }
+  input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; }
+  input:focus, select:focus, textarea:focus { border-color: var(--hijau); box-shadow: 0 0 0 3px rgba(15,107,79,.14); outline: none; }
+  .masa-kad:focus-within, .bulan-kotak:focus-within, .tarikh-kotak:focus-within #tarikhPapar { border-color: var(--hijau); box-shadow: 0 0 0 3px rgba(15,107,79,.14); }
+  .masa-kad, .bulan-kotak, #tarikhPapar, .bulan-nav, .chip-kecil, nav button, .sync-pill { transition: background .15s, border-color .15s, box-shadow .15s, color .15s, transform .1s; }
+
+  @media (hover: hover) {
+    .btn:not(.utama):not(.bahaya):not(.btn-cetak):not(:disabled):hover { background: var(--hijau-muda); }
+    .btn.bahaya:hover { background: #fee2e2; border-color: #fca5a5; }
+    .btn-cetak:hover { filter: brightness(.95); }
+    .bulan-nav:hover { border-color: var(--hijau); color: var(--hijau); background: var(--hijau-muda); }
+    .bulan-kotak:hover, .masa-kad:hover, .tarikh-kotak:hover #tarikhPapar { border-color: #9ca3af; }
+    .chip-kecil:hover { background: #d1fae5; }
+    .chip:not(.aktif):hover { background: var(--hijau-muda); }
+    .chip.aktif:hover { filter: brightness(.95); }
+    nav button:not(.aktif):hover { color: var(--hijau-teks); background: var(--hijau-muda); }
+    .sync-pill:hover { background: rgba(255,255,255,.26); }
+    .banner-amaran button:hover { background: #92400e; }
+  }
+  .bulan-nav:active, .chip:active, .chip-kecil:active, nav button:active, .sync-pill:active { transform: scale(.97); }
+  .banner-amaran button { background: #b45309; padding: 7px 12px; }
+  .sync-pill { font-size: .72rem; min-height: 28px; padding: 4px 10px; }
+  .sync-pill:focus-visible { outline-color: #fff; }
+  .chip { padding: 8px 14px; }
+  .chip-kecil { padding: 7px 11px; }
+  .pantas .btn { line-height: 1.25; }
+  .kpi-kotak { padding: 10px 6px; }
+  .kpi-kotak small { margin-bottom: 2px; }
+  .kpi-kotak b { font-size: 1.12rem; line-height: 1.3; }
+  .bulan-papar { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 6px; }
+  .item .btn { min-height: 32px; }
+  #ringkasAdmin .item { min-height: 52px; }
+  .modal-kotak p { text-wrap: pretty; }
+  .modal-latar { padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
+  #jadualBingkai { height: 65vh; height: 65dvh; }
+
+  @media (min-width: 768px) {
+    nav { justify-content: center; gap: 4px; padding: 0 16px; }
+    nav button { flex: 0 1 160px; }
+  }
+  @media (max-width: 767px) {
+    input, select, textarea { font-size: 1rem; } /* elak iOS zum automatik */
+    .chip { min-height: 40px; }
+    .chip-kecil { min-height: 36px; }
+    .item .btn { min-height: 36px; padding: 6px 11px; }
+    .bulan-nav, .btn-cetak, .bulan-kotak { height: 44px; }
+    .bulan-nav { width: 44px; }
+    .btn { min-height: 44px; }
+  }
+  @media (max-width: 380px) {
+    main { padding-left: 12px; padding-right: 12px; }
+    .btn-cetak { padding: 0 10px; font-size: .8rem; }
+    .bulan { gap: 6px; }
+    .bulan-papar { font-size: .86rem; }
+    .kpi-kotak b { font-size: 1rem; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
   }
