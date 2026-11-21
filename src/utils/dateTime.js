@@ -24,6 +24,8 @@ export const hariTeks = t => (t ? HARI[new Date(t + 'T00:00').getDay()] || '' : 
 
 export const namaBulan = bulan => BULAN[bulan.slice(5) - 1] + ' ' + bulan.slice(0, 4);
 
+export const teksSelesai = st => `✓ SELESAI · ${tarikhTeks(st.masa.slice(0, 10))}${st.masa.slice(10)}`;
+
 export const bertindih = (a, b) =>
   minit(a.mula) < minit(b.tamat) && minit(b.mula) < minit(a.tamat);
 

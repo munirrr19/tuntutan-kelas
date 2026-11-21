@@ -160,7 +160,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   white-space: nowrap; flex: none; background: var(--hijau-grad); color: #fff; border: 0;
   box-shadow: 0 2px 6px rgba(15,107,79,.2);
 }
-#ringkasAdmin .btn-cetak { height: var(--sentuh) !important; padding: 0 var(--r4) !important; font-size: var(--fs-s) !important; }
+#ringkasAdmin .btn-cetak { height: var(--sentuh); padding: 0 var(--r4); font-size: var(--fs-s); }
 @media (max-width: 479px) {
   .bulan { flex-wrap: wrap; }
   .bulan .btn-cetak { flex: 1 0 100%; order: 3; }

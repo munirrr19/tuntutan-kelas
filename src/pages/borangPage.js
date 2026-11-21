@@ -1,5 +1,5 @@
 import { state } from '../state/store.js';
-import { namaBulan, tarikhTeks } from '../utils/dateTime.js';
+import { namaBulan, teksSelesai } from '../utils/dateTime.js';
 import { $ } from '../utils/format.js';
 import { api } from '../services/api.js';
 import { kemasCacheDariState } from '../services/cache.js';
@@ -12,7 +12,6 @@ export function lukisBorang() {
   const senarai = entriBulan(state.guru.id);
   const s = statusSelesai(state.guru.id);
   const bln = namaBulan(state.bulan);
-  const teksSelesai = st => `✓ SELESAI · ${tarikhTeks(st.masa.slice(0, 10))}${st.masa.slice(10)}`;
 
   $('kotakSelesai').innerHTML = s
     ? `<div class="ringkas" style="margin:0">${teksSelesai(s)}</div>

@@ -1,5 +1,5 @@
 import { state } from '../state/store.js';
-import { masaTeks, namaBulan, tarikhTeks } from '../utils/dateTime.js';
+import { masaTeks, namaBulan, tarikhTeks, teksSelesai } from '../utils/dateTime.js';
 import { $, esc, jamTeks, jumlah, rm } from '../utils/format.js';
 import { api, token } from '../services/api.js';
 import { kemasCacheDariState } from '../services/cache.js';
@@ -13,7 +13,6 @@ export function lukisSenarai() {
   const jumlahJam = jumlah(senarai);
   const s = statusSelesai(state.guru.id);
   const bln = namaBulan(state.bulan);
-  const teksSelesai = st => `✓ SELESAI · ${tarikhTeks(st.masa.slice(0, 10))}${st.masa.slice(10)}`;
 
   $('kpiSenarai').innerHTML = `<div class="kpi-kad tabular">
     <div class="kpi-atas"><span>${bln}</span><span class="lencana ${s ? 'lencana-hijau' : 'lencana-draf'}">${s ? '✓ Selesai' : 'Draf'}</span></div>

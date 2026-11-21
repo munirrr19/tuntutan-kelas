@@ -111,6 +111,7 @@ function jawab_(obj) {
 // GET: rekod guru ini (admin: semua guru) untuk satu tahun + profil + kadar
 function doGet(e) {
   try {
+    if (!e || !e.parameter) throw new Error('Permintaan tidak sah');
     const guru = cariGuru_(e.parameter.token);
     // Hantar setahun sahaja: data bertahun (~7,000 rekod/tahun) terlalu besar untuk telefon admin
     const tahun = String(e.parameter.tahun || '');
@@ -142,12 +143,15 @@ function doPost(e) {
   // Hujung bulan ramai guru simpan serentak; jika masih sibuk, ralat ini bukan JSON dan telefon akan cuba semula
   lock.waitLock(30000);
   try {
+    if (!e || !e.postData || !e.postData.contents) throw new Error('Permintaan tidak sah');
     const b = JSON.parse(e.postData.contents);
     const guru = cariGuru_(b.token);
     const ss = SpreadsheetApp.getActive();
     const selesai = helaiSelesai_().getDataRange().getValues();
     const iSelesai = bulan => selesai.findIndex(r => String(r[0]) === guru.id && String(r[1]) === bulan);
-    const kunci = tarikh => { if (iSelesai(String(tarikh).slice(0, 7)) > 0) throw new Error('Bulan ini sudah ditanda SELESAI'); };
+    const semakBulanDikunci = tarikh => {
+      if (iSelesai(String(tarikh).slice(0, 7)) > 0) throw new Error('Bulan ini sudah ditanda SELESAI');
+    };
 
     if (b.action === 'simpan' || b.action === 'padam') {
       const sh = ss.getSheetByName(DATA);
@@ -158,14 +162,14 @@ function doPost(e) {
         const lama = sh.getRange(baris, 1, 1, LAJUR.length).getValues()[0];
         // Guru hanya boleh ubah rekod sendiri (admin juga)
         if (String(lama[7]) !== guru.id) throw new Error('Bukan rekod anda');
-        kunci(lama[1]);
+        semakBulanDikunci(lama[1]);
       }
       if (b.action === 'padam') {
         if (baris) sh.deleteRow(baris);
       } else {
         const r = { ...b.entri, guru: guru.id };
         if (!/^\d{4}-\d{2}-\d{2}$/.test(r.tarikh) || !(Number(r.jam) > 0)) throw new Error('Data tidak sah');
-        kunci(r.tarikh);
+        semakBulanDikunci(r.tarikh);
         const nilai = [LAJUR.map(k => String(r[k] ?? ''))];
         if (baris) sh.getRange(baris, 1, 1, LAJUR.length).setValues(nilai);
         else sh.getRange(sh.getLastRow() + 1, 1, 1, LAJUR.length).setNumberFormat('@').setValues(nilai);
