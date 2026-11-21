@@ -624,15 +624,15 @@
   <section id="tab-catat" class="aktif">
     <div id="bannerToken" class="kad tiada-token" hidden>
       <h2>Buka pautan peribadi anda dahulu</h2>
-      <p>Setiap guru ada pautan sendiri. Pautan itu memberitahu sistem siapa anda, jadi rekod tidak bercampur dengan guru lain.</p>
+      <p>Setiap guru mempunyai pautan sendiri supaya rekod tidak bercampur dengan guru lain.</p>
       <ol>
-        <li>Minta pautan peribadi daripada Setiausaha Al-Quran (admin).</li>
-        <li>Buka pautan itu di telefon ini. Ia akan diingat secara automatik.</li>
-        <li>Lepas itu, buka sistem ini seperti biasa untuk mencatat kelas.</li>
+        <li>Dapatkan pautan peribadi daripada Setiausaha Al-Quran (admin).</li>
+        <li>Buka pautan tersebut pada peranti ini. Pautan akan disimpan secara automatik.</li>
+        <li>Selepas itu, buka sistem ini seperti biasa untuk mencatat kelas.</li>
       </ol>
     </div>
     <div id="bannerKunci" class="banner-amaran" style="display:none">
-      <span>Bulan ini sudah ditanda <b>SELESAI</b>. Buka semula di tab Borang untuk tambah atau ubah.</span>
+      <span>Bulan ini telah ditandakan <b>SELESAI</b>. Buka semula di tab Borang untuk menambah atau mengubah rekod.</span>
       <button type="button" onclick="tukarTab('borang')">Ke Borang</button>
     </div>
     <form id="fCatat" class="kad">
@@ -653,7 +653,7 @@
         </div>
         <div class="catat-lajur">
       <div class="label-baris">
-        <label>Masa Mengajar</label>
+        <label>Masa mengajar</label>
         <div class="preset">
           <button type="button" class="chip-kecil" onclick="setMulaPreset('20:00')">8.00 mlm</button>
           <button type="button" class="chip-kecil" onclick="setMulaPreset('21:00')">9.00 mlm</button>
@@ -685,7 +685,7 @@
       <input id="catatan" placeholder="cth: Ganti Ustaz Ali">
 
       <button type="submit" class="btn utama" id="btnSimpan" aria-describedby="petunjukSimpan">Simpan</button>
-      <div class="label-petunjuk" id="petunjukSimpan" style="text-align:center;margin-top:8px" hidden>Pilih Tingkatan dahulu supaya boleh Simpan.</div>
+      <div class="label-petunjuk" id="petunjukSimpan" style="text-align:center;margin-top:8px" hidden>Sila pilih tingkatan dahulu untuk menyimpan.</div>
       <button type="button" class="btn" id="btnBatal" style="display:none;width:100%;margin-top:8px">Batal ubah</button>
       </div>
     </form>
@@ -735,7 +735,7 @@
     <div class="kad tiada-cetak">
       <b>Jadual kelas bulanan</b>
       <div class="label-petunjuk" id="statusJadual" style="margin:4px 0 10px"></div>
-      <label class="btn" style="margin:0">Muat naik jadual baru<input type="file" class="sr-only" accept="image/*,application/pdf" onchange="muatNaikJadual(this)"></label>
+      <label class="btn" style="margin:0">Muat naik jadual baharu<input type="file" class="sr-only" accept="image/*,application/pdf" onchange="muatNaikJadual(this)"></label>
     </div>
     <div class="kad tiada-cetak" id="ringkasAdmin"></div>
     <div class="pratonton" id="borangAdmin"></div>
@@ -757,7 +757,7 @@
 
 <dialog class="modal-latar" id="jadualLatar" aria-labelledby="jadualTajuk">
   <div class="modal-kotak">
-    <div class="label-baris" style="margin-top:0"><h3 id="jadualTajuk" style="margin:0">Jadual Kelas</h3><a class="label-petunjuk" id="jadualPenuh" target="_blank" rel="noopener">Buka penuh ↗</a></div>
+    <div class="label-baris" style="margin-top:0"><h3 id="jadualTajuk" style="margin:0">Jadual kelas</h3><a class="label-petunjuk" id="jadualPenuh" target="_blank" rel="noopener">Buka penuh ↗</a></div>
     <iframe id="jadualBingkai" title="Jadual kelas"></iframe>
     <button type="button" class="btn" style="width:100%;margin-top:10px" onclick="$('jadualLatar').close()">Tutup</button>
   </div>
@@ -856,7 +856,7 @@ const token = () => localStorage.getItem('token') || '';
 if (kunci && kunci !== token() && (!token() || confirm('Tukar ke akaun lain?'))) localStorage.setItem('token', kunci);
 
 async function api(body) {
-  if (!token()) throw new Error('Sila buka pautan peribadi anda daripada admin');
+  if (!token()) throw new Error('Sila buka pautan peribadi yang diberikan oleh admin');
   const res = body
     ? await fetch(API, { method: 'POST', body: JSON.stringify({ ...body, token: token() }) })
     : await fetch(API + '?token=' + encodeURIComponent(token()) + '&tahun=' + tahunDimuat);
@@ -942,7 +942,7 @@ async function hantar() {
         await api({ action: 'simpan', entri: r });
       } catch (err) {
         if (!err.pelayan) {
-          mesej(`${q.length} rekod belum dihantar. Akan dicuba semula.`);
+          mesej(`${q.length} rekod belum dihantar. Penghantaran akan dicuba semula.`);
           clearTimeout(hantar.t); hantar.t = setTimeout(hantar, 30000);
           return;
         }
@@ -961,7 +961,7 @@ addEventListener('beforeunload', e => { if (gilir().length) e.preventDefault(); 
 function kemasJadual() {
   $('btnJadual').hidden = !jadual;
   $('statusJadual').textContent = (jadual ? 'Jadual semasa dimuat naik ' + tarikhTeks(jadual.masa) : 'Belum ada jadual')
-    + '. Muat naik PDF/gambar baru untuk menggantikannya.';
+    + '. Muat naik PDF atau gambar baharu untuk menggantikannya.';
 }
 window.bukaJadual = () => {
   $('jadualBingkai').src = `https://drive.google.com/file/d/${jadual.id}/preview`;
@@ -994,7 +994,7 @@ window.muatNaikJadual = async input => {
     const d = await api({ action: 'jadual', mime: blob.type, data });
     jadual = d.jadual; kemasJadual();
     mesej('Jadual dikemas kini');
-  } catch (e) { mesej(e.message || 'Gagal muat naik', true); }
+  } catch (e) { mesej(e.message || 'Gagal memuat naik', true); }
 };
 
 // ---- Tab ----
@@ -1094,7 +1094,7 @@ $('btnBatal').onclick = resetCatat;
 
 $('fCatat').onsubmit = async e => {
   e.preventDefault();
-  if (!$('tingkatan').value) return mesej('Pilih Tingkatan dahulu', true);
+  if (!$('tingkatan').value) return mesej('Sila pilih tingkatan dahulu', true);
   const r = {
     id: idUbah || crypto.randomUUID(),
     tarikh: $('tarikh').value,
@@ -1105,9 +1105,9 @@ $('fCatat').onsubmit = async e => {
     guru: guru.id,
   };
   r.jam = kiraJam(r.mula, r.tamat);
-  if (statusSelesai(guru.id, r.tarikh.slice(0, 7))) return mesej('Bulan ini sudah SELESAI. Buka semula di tab Borang.', true);
+  if (statusSelesai(guru.id, r.tarikh.slice(0, 7))) return mesej('Bulan ini telah ditandakan SELESAI. Buka semula di tab Borang.', true);
   const tindih = entri.find(x => x.guru === guru.id && x.id !== r.id && x.tarikh === r.tarikh && bertindih(x, r));
-  if (tindih && !(await sahkan('Masa Bertindih', `Bertindih dengan rekod ${tindih.tingkatan} (${masaTeks(tindih.mula)} – ${masaTeks(tindih.tamat)}). Simpan juga?`, 'Simpan juga'))) return;
+  if (tindih && !(await sahkan('Masa bertindih', `Bertindih dengan rekod ${tindih.tingkatan} (${masaTeks(tindih.mula)} – ${masaTeks(tindih.tamat)}). Simpan juga?`, 'Simpan juga'))) return;
   setGilir(gilir().filter(x => x.id !== r.id).concat(r));
   entri = entri.filter(x => x.id !== r.id).concat(r);
   localStorage.setItem('tingkatanAkhir', r.tingkatan);
@@ -1143,13 +1143,13 @@ function lukis() {
     <div class="kpi-atas"><span>${namaBulan()}</span><span class="lencana ${s ? 'lencana-hijau' : 'lencana-draf'}">${s ? '✓ Selesai' : 'Draf'}</span></div>
     <div class="kpi-grid">
       <div class="kpi-kotak"><small>Kelas</small><b>${senarai.length}</b></div>
-      <div class="kpi-kotak"><small>Jumlah Jam</small><b>${jamTeks(jumlahJam)}</b></div>
+      <div class="kpi-kotak"><small>Jumlah jam</small><b>${jamTeks(jumlahJam)}</b></div>
       <div class="kpi-kotak"><small>Jumlah (RM)</small><b>${rm(jumlahJam * kadar())}</b></div>
     </div>
   </div>`;
 
   if (!token()) {
-    $('senarai').innerHTML = '<div class="kosong">Pautan peribadi diperlukan. Sila buka pautan peribadi anda daripada admin.</div>';
+    $('senarai').innerHTML = '<div class="kosong">Pautan peribadi diperlukan. Sila dapatkan pautan tersebut daripada admin.</div>';
   } else if (sedangMuat) {
     $('senarai').innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
   } else {
@@ -1167,7 +1167,7 @@ function lukis() {
   $('kotakSelesai').innerHTML = s
     ? `<div class="ringkas" style="margin:0">${teksSelesai(s)}</div>
        <button class="btn" style="width:100%;margin-top:8px" onclick="tandaSelesai(true)">Buka semula untuk ubah</button>`
-    : `<small style="color:var(--kelabu)">Semak borang di bawah. Bila semua kelas ${namaBulan()} sudah diisi, tekan SELESAI supaya Setiausaha boleh proses tuntutan.</small>
+    : `<small style="color:var(--kelabu)">Semak borang di bawah. Apabila semua kelas ${namaBulan()} telah diisi, tekan SELESAI supaya Setiausaha dapat memproses tuntutan.</small>
        <button class="btn utama" ${senarai.length ? '' : 'disabled aria-describedby="sebabLumpuh"'} onclick="tandaSelesai(false)">SELESAI</button>
        ${senarai.length ? '' : `<small id="sebabLumpuh" style="display:block;margin-top:8px;color:var(--kelabu);text-align:center">Belum ada rekod untuk dihantar bagi ${namaBulan()}.</small>`}`;
 
@@ -1226,7 +1226,7 @@ function lukisAdmin() {
           <span class="lencana ${s ? 'lencana-hijau' : 'lencana-merah'}">${s ? '✓ Selesai' : 'Belum'}</span></div>
           <small class="tabular">${senarai.length ? `${senarai.length} kelas · ${jamTeks(jumlah(senarai))} jam · RM${rm(jumlah(senarai) * kadar())}` : 'Tiada rekod'}</small></div>
           ${senarai.length ? `<button class="btn btn-cetak" style="height:28px;padding:0 10px;font-size:.73rem" onclick="cetakGuru('${g.id}')">Cetak</button>` : ''}</div>`).join('')
-        : '<div class="kosong">Tiada guru sepadan</div>')
+        : '<div class="kosong">Tiada guru yang sepadan</div>')
     : '<div class="kosong">Tiada guru</div>';
   $('borangAdmin').innerHTML = ada.filter(x => !pilihCetak || x.g.id === pilihCetak).map(x => borangHTML(x.g, x.senarai)).join('');
   skalaBorang();
@@ -1360,20 +1360,20 @@ window.padam = async id => {
 };
 window.tandaSelesai = async batal => {
   const ok = await sahkan(
-    batal ? `Buka Semula ${namaBulan()}?` : `Tanda ${namaBulan()} SELESAI?`,
+    batal ? `Buka semula ${namaBulan()}?` : `Tandakan ${namaBulan()} SELESAI?`,
     batal ? 'Status akan bertukar kepada BELUM SELESAI dan rekod boleh diubah semula.'
-          : 'Rekod bulan ini akan dikunci supaya Setiausaha boleh memproses tuntutan.',
-    batal ? 'Buka Semula' : 'Ya, SELESAI'
+          : 'Rekod bulan ini akan dikunci supaya Setiausaha dapat memproses tuntutan.',
+    batal ? 'Buka semula' : 'Ya, SELESAI'
   );
   if (!ok) return;
   mesej('Menghantar...');
   try {
     await hantar();
-    if (gilir().some(q => q.tarikh.startsWith(bulan))) throw new Error('Ada rekod bulan ini belum dihantar. Cuba lagi bila ada internet.');
+    if (gilir().some(q => q.tarikh.startsWith(bulan))) throw new Error('Terdapat rekod bulan ini yang belum dihantar. Cuba lagi apabila sambungan internet tersedia.');
     await api({ action: 'selesai', bulan, batal });
     selesai = selesai.filter(s => !(s.guru === guru.id && s.bulan === bulan));
     if (!batal) selesai.push({ guru: guru.id, bulan, masa: new Date().toLocaleString('sv').slice(0, 16) });
-    lukis(); mesej(batal ? 'Dibuka semula' : 'Ditanda SELESAI');
+    lukis(); mesej(batal ? 'Dibuka semula' : 'Ditandakan SELESAI');
   } catch (err) { mesej(err.message, true); }
 };
 document.querySelectorAll('.pilihBulan').forEach(i => i.onchange = () => { if (i.value) tukarBulan(i.value); });
