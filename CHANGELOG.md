@@ -3,6 +3,12 @@
 Butiran penuh: `git log`.
 
 ## 2026-11-21
+- **Penstrukturan semula kod & kualiti (tanpa ubah rupa atau tingkah laku):**
+  - Pecahkan `index.html` monolitik kepada modul berasingan: `styles/` (`tokens.css`, `layout.css`, `components.css`, `print.css`), `src/config/`, `src/state/`, `src/utils/`, `src/services/`, `src/components/`, dan `src/pages/`.
+  - Pindahkan aset imej ke `assets/` (termasuk kemas kini `manifest.json`) dan `Code.gs` ke `backend/Code.gs`.
+  - Baiki bug `padam()` supaya tidak membuang rekod dari gilir sebelum API berjaya, kemas kini cache tempatan selepas setiap mutasi, bersihkan `#k=<token>` daripada URL selepas disimpan, dan baiki sanitasi `esc()` untuk apostrof (`'`) bersama event delegation.
+  - Buang duplikasi helper `teksSelesai` dan `!important` CSS yang tidak diperlukan; pindahkan semakan `console.assert` ke ujian unit dalam `tests/utils.test.js`.
+  - Tambah `ARCHITECTURE.md`, `.env.example`, dan kemas kini `README.md` serta `docs/pembangunan.md`.
 - Reka semula UI responsif (fungsi, data dan kandungan kekal): token jarak/jejari/tipografi, breakpoint mobile-first (360–767, ≥768, ≥1280), sasaran sentuh 44px sebenar, teks minimum 12px, kontras AA. Tablet: tab atas dan borang Catat 2 lajur. Desktop: KPI melekat, kawalan kiri dan pratonton A4 kanan. Cetakan A4 tidak berubah.
 - Polish visual: header, tab dan kandungan sejajar pada satu lebar bekas; state hover (hanya peranti hover), active dan fokus konsisten; toast berbilang baris dan modal bottom-sheet dikemas.
 

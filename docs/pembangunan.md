@@ -3,42 +3,46 @@
 ## Struktur
 
 ```
-index.html       seluruh aplikasi (HTML + CSS + JS dalam satu fail), dihos di GitHub Pages
-Code.gs          pelayan Google Apps Script, terikat pada Google Sheet
+index.html       titik masuk HTML utama, dihos di GitHub Pages
 manifest.json    PWA (Add to Home screen)
-*.png            logo dan ikon
+styles/          CSS terasing (tokens, layout, components, print)
+src/             modul ES JavaScript (config, state, utils, services, components, pages)
+assets/          logo dan ikon
+backend/Code.gs  pelayan Google Apps Script, terikat pada Google Sheet
+tests/           ujian unit (node:test)
 docs/            dokumentasi
 ```
 
-Tiada *build step* dan tiada kebergantungan.
+Tiada *build step* dan tiada kebergantungan luaran.
 
 ## Seni bina
 
 ```
-Telefon guru ──HTTPS──▶ GitHub Pages (index.html)
+Telefon guru ──HTTPS──▶ GitHub Pages (index.html + src/ + styles/)
      │
-     └──GET / POST JSON──▶ Apps Script Web App (Code.gs)
+     └──GET / POST JSON──▶ Apps Script Web App (backend/Code.gs)
                                    │
                                    ▼
                            Google Sheet (Kehadiran, Guru, Tetapan, Selesai)
 ```
 
-- Token guru disimpan dalam `localStorage` selepas link peribadi dibuka (`#k=<token>`).
+- Token guru disimpan dalam `localStorage` selepas link peribadi dibuka (`#k=<token>`), kemudian hash URL dibersihkan.
 - **Gilir simpanan:** rekod dipaparkan serta-merta, disimpan dalam `localStorage` (`gilir`) dan dihantar di belakang. Jika gagal kerana rangkaian, ia dicuba semula. Ini mengelakkan kehilangan rekod jika app ditutup atau tiada internet.
 - Apps Script mengambil 2–3 saat bagi setiap simpanan, sebab itu simpanan tidak menunggu pelayan.
 
-## Kemas kini laman (`index.html`)
-1. Ubah `index.html`.
-2. Uji dengan membuka fail secara setempat, atau tolak ke cabang lain dahulu.
-3. Push ke `main`. GitHub Pages menerbitkan dalam masa satu atau dua minit.
-4. Guru mungkin perlu tutup dan buka semula app.
+## Kemas kini laman (`index.html`, `styles/`, `src/`)
+1. Ubah fail berkaitan (`index.html`, `styles/`, atau `src/`).
+2. Uji melalui pelayan tempatan (`python -m http.server 8080` atau `npx serve .`) kerana ES Modules memerlukan HTTP/HTTPS.
+3. Jalankan ujian unit: `node --test tests/utils.test.js`.
+4. Push ke `main`. GitHub Pages menerbitkan dalam masa satu atau dua minit.
+5. Guru mungkin perlu tutup dan buka semula app.
 
-## Kemas kini `Code.gs`
-1. Buka Google Sheet → **Extensions → Apps Script**. Tampal kod baharu dan simpan.
+## Kemas kini `backend/Code.gs`
+1. Buka Google Sheet → **Extensions → Apps Script**. Tampal kod baharu daripada `backend/Code.gs` dan simpan.
 2. Jalankan **setup** sekali (selamat dijalankan berulang kali: mencipta tab dan tajuk yang belum ada).
 3. **Deploy → Manage deployments → Edit (ikon pensel) → Version: New version → Deploy.** URL web app kekal sama.
 
-> **Jangan cipta deployment baharu.** URL `/exec` sudah tertanam dalam `index.html`. Deployment baharu memberi URL lain dan laman akan berhenti berfungsi.
+> **Jangan cipta deployment baharu.** URL `/exec` sudah tertanam dalam `src/config/appConfig.js`. Deployment baharu memberi URL lain dan laman akan berhenti berfungsi.
 
 Jika kod mula memakai perkhidmatan Google baharu, pemilik mesti menjalankan satu fungsi dalam editor dan menekan **Allow** sebelum deploy.
 
